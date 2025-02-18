@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code to PDF Converter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <script>
+        function togglePDFView() {
+            var pdfContainer = document.getElementById("pdf-view-container");
+            if (pdfContainer.style.display === "none") {
+                pdfContainer.style.display = "block";
+            } else {
+                pdfContainer.style.display = "none";
+            }
+        }
+    </script>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='background_image.png') }}" class="background-image" alt="Background Image">
+    <div class="container">
+        <div class="left-section">
+            <h1>Let's glide into the future together...</h1>
+            <h2>Convert source code into PDF files for easy sharing.</h2>
+            <ul>
+                <li>Upload text file or a ZIP folder of multiple files.</li>
+                <li>Non-text files will be ignored.</li>
+            </ul>
+        </div>
+        <div class="right-section">
+            <form action="/" method="post" enctype="multipart/form-data">
+                <h2>Upload Source Code File or ZIP Folder</h2>
+                <input type="file" name="files" multiple required>
+                <button type="submit">Convert to PDF</button>
+            </form>
+            
+            {% if pdf_url %}
+            <div class="download-section">
+                <h3>View or Download your PDF:</h3>
+                <button onclick="togglePDFView()">View</button>
+                <a href="{{ pdf_url }}" class="pdf-button download-btn" download>Download</a>
+
+                <div id="pdf-view-container" style="display: none;">
+                    <iframe src="{{ view_url }}"></iframe>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

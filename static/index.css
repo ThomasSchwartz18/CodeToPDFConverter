@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Avenir+Next+LT+Pro:wght@400&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: rgba(58, 165, 154);
+    color: #FFF5E1;
+    font-family: "Avenir Next LT Pro", sans-serif;
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Full-Screen Background Image */
+.background-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+}
+
+/* Container for sections */
+.container {
+    display: flex;
+    width: 90%;
+    height: 80%;
+    background-color: transparent;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* Left Section */
+.left-section {
+    flex: 1;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.left-section h1 {
+    font-family: "Sitka Subheading", serif;
+    font-size: 94px;
+    margin-bottom: 20px;
+}
+
+.left-section ul {
+    font-size: 18px;
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+/* Right Section */
+.right-section {
+    flex: 1;
+    background-color: rgba(58, 165, 154, 0.85);
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Form Styling */
+form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    width: 90%;
+    text-align: center;
+}
+
+input[type="file"] {
+    font-size: 16px;
+    padding: 2px;
+    border: 1px solid #FFF5E1;
+    border-radius: 5px;
+    width: 100%;
+    background-color: transparent;
+    color: #FFF5E1;
+}
+
+input[type="file"]::file-selector-button {
+    background-color: #FFF5E1;
+    color: #779FA7;
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Button Styling */
+button {
+    font-family: "Avenir Next LT Pro", sans-serif;
+    font-size: 18px;
+    background-color: #FFF5E1;
+    color: #779FA7;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #f3dab4;
+}
+
+.download-section {
+    width: 100%;
+    text-align: center;
+    align-items: center;
+}
+
+.download-btn {
+    font-family: "Avenir Next LT Pro", sans-serif;
+    font-size: 18px;
+    background-color: #a4fca4;
+    color: #779FA7;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Make it behave like a button */
+}
+
+.download-btn:hover {
+    background-color: #39ff39;
+}
+
+/* Adjusted PDF preview window */
+#pdf-view-container iframe {
+    width: 90%;
+    height: 400px;  /* Reduced height */
+    border: 1px solid #FFF5E1;
+    margin-top: 10px;
+}
