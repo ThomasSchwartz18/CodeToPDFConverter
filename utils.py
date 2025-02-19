@@ -6,35 +6,41 @@ from config import UPLOAD_DIR, IMAGE_EXTENSIONS, TEXT_EXTENSIONS
 
 def generate_code_pdf(file_paths, output_pdf_path):
     doc = fitz.open()
-    # Standard letter size with minimal margins
     page_width, page_height = 612, 792  
-    margin = 10  # Reduced margin from standard 50 to 10
+    margin = 10  
     font_size = 10
     line_height = 12
-    max_chars_per_line = 90  # Slightly increased to fit more text
+    max_chars_per_line = 90  
 
     for file_path in file_paths:
         file_name = os.path.basename(file_path)
+
+        # Skip files that start with "._"
+        if file_name.startswith("._"):
+            continue
+
         file_extension = os.path.splitext(file_name)[1].lower()
 
         if file_extension not in TEXT_EXTENSIONS and file_extension not in IMAGE_EXTENSIONS:
-            continue  # Skip unsupported files
+            continue  
+
+        # Extract relative path (only the part after the uploads directory)
+        relative_path = file_path
+        upload_index = file_path.find("uploads")
+        if upload_index != -1:
+            relative_path = file_path[upload_index + len("uploads") + 1:]  # Trim path up to 'uploads/'
 
         page = doc.new_page(width=page_width, height=page_height)
         y_position = margin
 
-        # File Name Header
         page.insert_text((margin, y_position), f"File: {file_name}",
                          fontsize=12, fontname="courier-bold")
         y_position += line_height * 2
         
-        page.insert_text((margin, y_position), f"File Path: {file_path}", fontsize=10, fontname="courier-bold")
+        page.insert_text((margin, y_position), f"File Path: {relative_path}", fontsize=10, fontname="courier-bold")
         y_position += line_height * 2
 
         if file_extension in IMAGE_EXTENSIONS:
-            # page.insert_text((margin, y_position), f"File Path: {file_path}",
-            #                  fontsize=10, fontname="courier")
-
             y_position += line_height * 2
             page.insert_text((margin, y_position), "This file is an asset.",
                              fontsize=10, fontname="courier")
@@ -47,7 +53,7 @@ def generate_code_pdf(file_paths, output_pdf_path):
                     with open(file_path, "r", encoding="latin-1") as file:
                         code_content = file.readlines()
                 except Exception:
-                    continue  # Skip unreadable files
+                    continue  
 
             for line in code_content:
                 wrapped_lines = textwrap.wrap(line.rstrip(), width=max_chars_per_line)
