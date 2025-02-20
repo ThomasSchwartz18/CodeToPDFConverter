@@ -4,7 +4,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: rgba(58, 165, 154);
-    color: #FFF5E1;
+    color: #fffdf9;
     font-family: "Avenir Next LT Pro", sans-serif;
     display: flex;
     height: 100vh;
@@ -59,7 +59,7 @@ body {
 /* Right Section */
 .right-section {
     flex: 1;
-    background-color: rgba(58, 165, 154, 0.85);
+    background-color: rgba(58, 165, 83, 0.245);
     padding: 25px;
     border-radius: 15px;
     display: flex;
@@ -70,7 +70,7 @@ body {
 
 /* Form Styling */
 form {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0);
     padding: 10px;
     border-radius: 10px;
     width: 90%;
