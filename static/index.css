@@ -38,7 +38,7 @@ body {
 /* Left Section */
 .left-section {
     flex: 1;
-    padding: 50px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
