@@ -78,7 +78,6 @@ form {
     border-radius: 10px;
     width: 90%;
     text-align: center;
-    text-shadow: 4px 1px 8px rgba(0,0,0,0.5);
 }
 
 form button {
@@ -150,6 +149,7 @@ button:hover,
     margin-top: 10px;
     text-decoration: none;
     display: inline-block;
+    text-shadow: none;
 }
 
 .download-btn:hover {
