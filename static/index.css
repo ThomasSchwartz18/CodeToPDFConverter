@@ -77,6 +77,10 @@ form {
     text-align: center;
 }
 
+form button {
+    margin-top: 10px;
+}
+
 input[type="file"] {
     font-size: 16px;
     padding: 2px;
@@ -110,7 +114,6 @@ button,
     transition: background 0.3s;
     text-decoration: none;
     display: inline-block;
-    margin: 15px;
 }
 
 button:hover,
@@ -163,4 +166,8 @@ button:hover,
     display: flex;
     padding-right: 15px;
     gap: 10px;
+}
+
+.nav-button {
+    margin-top: 10px;
 }
