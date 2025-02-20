@@ -15,9 +15,26 @@
             }
         }
 
+        function showSection(sectionId) {
+            // Hide all sections
+            document.getElementById('upload-section').style.display = 'none';
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('register-section').style.display = 'none';
+
+            // Show the selected section
+            if (sectionId) {
+                document.getElementById(sectionId).style.display = 'flex'; // Use flex to maintain layout
+            }
+        }
+
+        function goBackToUpload() {
+            // Show the upload section and hide login/register sections
+            showSection('upload-section');
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             var video = document.querySelector('.background-video');
-            video.playbackRate = 0.5; // Change this value to adjust the speed
+            video.playbackRate = 0.75; // Change this value to adjust the speed
         });
     </script>
 </head>
@@ -25,18 +42,17 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-right">
-            <a href="/login" class="nav-button">Login</a>
-            <a href="/register" class="nav-button">Register</a>
+            <a href="#" class="nav-button" onclick="showSection('login-section')">Login</a>
+            <a href="#" class="nav-button" onclick="showSection('register-section')">Register</a>
         </div>
     </nav>
-
-    <!-- Replace the image with a video element -->
     <video autoplay muted loop playsinline class="background-video">
         <source src="{{ url_for('static', filename='background_video.mp4') }}" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
-    <div class="container">
+    <!-- Upload Section -->
+    <div id="upload-section" class="container">
         <div class="left-section">
             <h1>Let's glide into the future together...</h1>
             <h2>Convert source code into PDF files for easy sharing.</h2>
@@ -61,6 +77,56 @@
                 </div>
             </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Login Section -->
+    <div id="login-section" class="container" style="display: none;">
+        <div class="left-section">
+            <h1>Let's glide into the future together...</h1>
+            <h2>Convert source code into PDF files for easy sharing.</h2>
+            <ul>
+                <li>Upload a text file or a ZIP folder of multiple files.</li>
+                <li>Non-text files will be ignored.</li>
+            </ul>
+        </div>
+        <div class="right-section">
+            <h1>Login</h1>
+            <p>Welcome back! Please log in to continue.</p>
+            <form action="/login" method="post">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <button type="submit">Login</button>
+            </form>
+            <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
+        </div>
+    </div>
+
+    <!-- Register Section -->
+    <div id="register-section" class="container" style="display: none;">
+        <div class="left-section">
+            <h1>Let's glide into the future together...</h1>
+            <h2>Convert source code into PDF files for easy sharing.</h2>
+            <ul>
+                <li>Upload a text file or a ZIP folder of multiple files.</li>
+                <li>Non-text files will be ignored.</li>
+            </ul>
+        </div>
+        <div class="right-section">
+            <h1>Register</h1>
+            <p>Create a new account to get started.</p>
+            <form action="/register" method="post" class="register-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" required>
+                <button type="submit">Register</button>
+            </form>
+            <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
         </div>
     </div>
 </body>
