@@ -87,16 +87,17 @@ form button {
 input[type="file"] {
     font-size: 16px;
     padding: 2px;
-    border: 1px solid #FFF5E1;
+    border: 1px solid #ebebeb;
     border-radius: 5px;
     width: 100%;
     background-color: transparent;
-    color: #FFF5E1;
+    color: #ebebeb;
+    text-shadow: 2px 1px 3px rgba(0,0,0,0.75);
 }
 
 input[type="file"]::file-selector-button {
-    background-color: #FFF5E1;
-    color: #779FA7;
+    background-color: #ebebeb;
+    color: #516d60;
     border: none;
     padding: 8px;
     border-radius: 5px;
