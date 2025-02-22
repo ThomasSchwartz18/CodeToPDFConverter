@@ -15,6 +15,6 @@ DATABASE_CONFIG = {
     'dbname': 'code_to_pdf',  # Your database name
     'user': 'postgres',       # Your PostgreSQL username
     'password': 'PostgreMoose58',  # Your PostgreSQL password
-    'host': 'localhost',      # Your PostgreSQL host
+    'host': '192.168.86.22',      # Your PostgreSQL host
     'port': 5432              # Your PostgreSQL port
 }

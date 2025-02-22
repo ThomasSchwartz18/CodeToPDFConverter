@@ -5,9 +5,21 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from db import create_user, get_user_by_username
 from config import UPLOAD_DIR
 from utils import generate_code_pdf, process_zip
+from dotenv import load_dotenv
 
 # Create the Flask application
 app = Flask(__name__)
+
+load_dotenv()  # Load environment variables from .env file
+
+app.secret_key = os.getenv('SECRET_KEY')
+DATABASE_CONFIG = {
+    'dbname': os.getenv('DB_NAME'),
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'host': os.getenv('DB_HOST'),
+    'port': os.getenv('DB_PORT')
+}
 
 # Generate a secure random secret key using the secrets module
 app.secret_key = secrets.token_hex(16)  # Generates a 32-character hexadecimal string
