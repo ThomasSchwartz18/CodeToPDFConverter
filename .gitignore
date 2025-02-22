@@ -1,8 +1,0 @@
-.env
-__pycache__/
-uploads/
-*.pyc
-*.pyo
-*.pyd
-*.db
-*.sqlite3
