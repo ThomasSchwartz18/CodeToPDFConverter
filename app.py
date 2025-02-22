@@ -12,7 +12,6 @@ app = Flask(__name__)
 
 load_dotenv()  # Load environment variables from .env file
 
-app.secret_key = os.getenv('SECRET_KEY')
 DATABASE_CONFIG = {
     'dbname': os.getenv('DB_NAME'),
     'user': os.getenv('DB_USER'),
@@ -20,6 +19,8 @@ DATABASE_CONFIG = {
     'host': os.getenv('DB_HOST'),
     'port': os.getenv('DB_PORT')
 }
+print(DATABASE_CONFIG)
+print("DB_HOST from .env:", os.getenv('DB_HOST'))
 
 # Generate a secure random secret key using the secrets module
 app.secret_key = secrets.token_hex(16)  # Generates a 32-character hexadecimal string

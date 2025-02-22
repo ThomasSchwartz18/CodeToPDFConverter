@@ -9,12 +9,3 @@ TEXT_EXTENSIONS = {".py", ".txt", ".html", ".js", ".css", ".java", ".cpp", ".c",
 
 # Ensure the directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# Database configuration
-DATABASE_CONFIG = {
-    'dbname': 'code_to_pdf',  # Your database name
-    'user': 'postgres',       # Your PostgreSQL username
-    'password': 'PostgreMoose58',  # Your PostgreSQL password
-    'host': '192.168.86.22',      # Your PostgreSQL host
-    'port': 5432              # Your PostgreSQL port
-}

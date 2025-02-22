@@ -14,6 +14,10 @@ def generate_code_pdf(file_paths, output_pdf_path):
 
     for file_path in file_paths:
         file_name = os.path.basename(file_path)
+        
+        # Skip any files in a .venv directory
+        if ".venv" in file_path.split(os.sep):
+            continue
 
         # Skip files that start with "._"
         if file_name.startswith("._"):
