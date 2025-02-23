@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Code to PDF Converter</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="../static/css/index.css">
     <script>
         function togglePDFView() {
             var pdfContainer = document.getElementById("pdf-view-container");
@@ -42,12 +42,23 @@
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="nav-right">
-            <a href="#" class="nav-button" onclick="showSection('login-section')">Login</a>
-            <a href="#" class="nav-button" onclick="showSection('register-section')">Register</a>
+            {% if 'user_id' in session %}
+                <div class="settings-dropdown">
+                    <img src="../static/images/settings_icon.png" alt="Settings" class="settings-icon">
+                    <div class="dropdown-content">
+                        <a href="#">Profile</a>
+                        <a href="#">Settings</a>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="#" class="nav-button" onclick="showSection('login-section')">Login</a>
+                <a href="#" class="nav-button" onclick="showSection('register-section')">Register</a>
+            {% endif %}
         </div>
     </nav>
     <video autoplay muted loop playsinline class="background-video">
-        <source src="{{ url_for('static', filename='background_video.mp4') }}" type="video/mp4">
+        <source src="../static/images/background_video.mp4" type="video/mp4">
         Your browser does not support the video tag.
     </video>
 
