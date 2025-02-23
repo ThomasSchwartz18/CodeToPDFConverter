@@ -2,20 +2,15 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
-
 load_dotenv()  # Load environment variables from .env file
 
-DATABASE_CONFIG = {
-    'dbname': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'host': os.getenv('DB_HOST'),
-    'port': os.getenv('DB_PORT')
-}
+connection_string = os.getenv('DATABASE_URL')
+print("Connection string:", connection_string)  # Debug print
 
 def get_db_connection():
-    """Connect to the PostgreSQL database."""
-    conn = psycopg2.connect(**DATABASE_CONFIG)
+    """Connect to the PostgreSQL database using a full connection string."""
+    connection_string = os.getenv('DATABASE_URL')
+    conn = psycopg2.connect(connection_string, sslmode='require')
     return conn
 
 def create_user(username, password):
