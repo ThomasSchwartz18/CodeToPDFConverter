@@ -37,3 +37,13 @@ def get_user_by_username(username):
     cur.close()
     conn.close()
     return user
+
+def get_user_by_id(user_id):
+    """Retrieve a user by their id."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return user

@@ -7,6 +7,7 @@ from config import UPLOAD_DIR
 from utils import generate_code_pdf, process_zip
 from dotenv import load_dotenv
 import re
+from db import create_user, get_user_by_username, get_user_by_id
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
@@ -51,7 +52,21 @@ def index():
     if request.method == "POST":
         uploaded_files = request.files.getlist("files")  # Accepts multiple files
         file_paths = []
+        # Loop through all uploaded files
         for file in uploaded_files:
+            # Check if the file is a ZIP file
+            if file.filename.endswith(".zip"):
+                # Ensure user is logged in
+                if 'user_id' not in session:
+                    flash("You must be logged in to upload ZIP folders!")
+                    return render_template("index.html", pdf_url=None, view_url=None, section='upload-section')
+                # If logged in, check subscription status
+                user = get_user_by_id(session['user_id'])
+                # Assuming the subscription column is at index 3 (adjust if needed)
+                if not user[3]:
+                    flash("You must be subscribed to upload ZIP folders!")
+                    return render_template("index.html", pdf_url=None, view_url=None, section='upload-section')
+                # If checks pass, save the file and process the ZIP
             file_path = os.path.join(UPLOAD_DIR, file.filename)
             file.save(file_path)
             if file.filename.endswith(".zip"):

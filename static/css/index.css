@@ -36,7 +36,7 @@ body {
 .container {
     display: flex;
     width: 90%;
-    height: 80%;
+    height: 85%;
     background-color: transparent;
     border-radius: 15px;
     overflow: hidden;
@@ -47,7 +47,7 @@ body {
 ############################################ */
 .left-section {
     flex: 1;
-    padding: 20px;
+    padding: 0px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -57,16 +57,34 @@ body {
 .left-section h1 {
     font-family: "Sitka Subheading", serif;
     font-size: 94px;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 
-.left-section ul {
-    font-size: 18px;
-    list-style-type: disc;
-    padding-left: 20px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+.file-info-table {
+    border-collapse: separate; /* Allows border-radius to work */
+    border-spacing: 0;         /* Remove gaps between cells */
+    width: 90%;
+    border-radius: 50px;
+    border-radius: 10px;       /* Adjust the value as needed */
+    overflow: hidden;          /* Clips the cell borders to the rounded corners */
+}
+  
+.file-info-table th,
+.file-info-table td {
+    border: 1px solid #ffffff; /* Adjust color and thickness as needed */
+    padding: 8px; /* Optional: add some padding for better readability */
 }
 
+.file-info-table th {
+    color: #888888;
+    text-shadow: none;
+}
+  
+.file-info-table th {
+    background-color: #f2f2f2a9; /* Optional: add a background color for headers */
+    text-align: left;
+}
+  
 /* ###########################################
    RIGHT SECTION STYLES
 ############################################ */
@@ -98,7 +116,7 @@ form button {
 }
 
 .flash-messages .flash-message {
-    color: red;
+    color: rgb(252, 177, 177);
     font-weight: bold;
     margin: 5px 0;
     text-shadow: 1px 1px 2px black;
@@ -140,6 +158,12 @@ input[type="file"]::file-selector-button {
    REGISTER FORM SPECIFIC STYLES
 ############################################ */
 .register-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-form {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -287,4 +311,36 @@ button:hover,
 #password-requirements li.valid {
     color: rgb(122, 217, 122);
     text-decoration: line-through;
+}
+
+/* ###########################################
+   FILE INPUT STYLES
+############################################ */
+/* Notification Container */
+#notification-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2000;
+  }
+  
+/* Alert Notification Styles */
+.alert-notification {
+    background-color: #ebebeb;
+    color: #ff914d;
+    border: 1px solid #ff914d;
+    border-radius: 8px;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.5s ease, bottom 0.5s ease;
+    bottom: -50px; /* start off-screen */
+    position: relative;
+}
+  
+/* When showing, set opacity to 1 */
+.alert-notification.show {
+    bottom: 20px;  /* end position */
+    opacity: 1;
 }

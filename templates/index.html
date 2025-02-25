@@ -31,6 +31,17 @@
     document.addEventListener("DOMContentLoaded", function() {
       var video = document.querySelector('.background-video');
       video.playbackRate = 0.75; // Change this value to adjust the speed
+
+      // Global Notification Animation
+      var notifications = document.querySelectorAll('.alert-notification');
+      notifications.forEach(function(notification) {
+          // Force reflow to ensure transition works
+          void notification.offsetWidth;
+          notification.classList.add('show');
+          setTimeout(function(){
+              notification.classList.remove('show');
+          }, 8000);
+      });
     });
   </script>
   <script>
@@ -81,20 +92,56 @@
       {% endif %}
     </div>
   </nav>
+
+  <!-- Global Notification Container -->
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div id="notification-container">
+        {% for message in messages %}
+          <div class="alert-notification">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   <video autoplay muted loop playsinline class="background-video">
     <source src="../static/images/background_video.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
+  
   <!-- Upload Section -->
   <div id="upload-section" class="container" style="display: {% if section=='upload-section' %}flex{% else %}none{% endif %};">
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
       <h2>Convert source code into PDF files for easy sharing.</h2>
-      <ul>
-        <li>Upload a text file or a ZIP folder of multiple files.</li>
-        <li>Non-text files will be ignored.</li>
-      </ul>
+      <table class="file-info-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Description</th>
+            <th>File Types</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Supported</td>
+            <td>Files that are processed and included in the PDF.</td>
+            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql</td>
+          </tr>
+          <tr>
+            <td>Ignored</td>
+            <td>Files that are skipped as they are non-text or unsupported for user security.</td>
+            <td>.exe, .dll, .env</td>
+          </tr>
+          <tr>
+            <td>Premium</td>
+            <td>ZIP folders or files requiring subscription for advanced processing.</td>
+            <td>.zip (multiple files)</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+    
     <div class="right-section">
       <form action="/" method="post" enctype="multipart/form-data">
         <h2>Upload Source Code File or ZIP Folder</h2>
@@ -113,6 +160,7 @@
       {% endif %}
     </div>
   </div>
+  
   <!-- Login Section -->
   <div id="login-section" class="container" style="display: {% if section=='login-section' %}flex{% else %}none{% endif %};">
     <div class="left-section">
@@ -126,25 +174,17 @@
     <div class="right-section">
       <h1>Login</h1>
       <p>Welcome back! Please log in to continue.</p>
-      <form action="/login" method="post">
+      <form action="/login" method="post" class="login-form">
         <label for="username">Email:</label>
         <input type="text" id="username" name="username" required>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div class="flash-messages">
-                {% for message in messages %}
-                    <p class="flash-message">{{ message }}</p>
-                {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
         <button type="submit">Login</button>
       </form>
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
     </div>
   </div>
+  
   <!-- Register Section -->
   <div id="register-section" class="container" style="display: {% if section=='register-section' %}flex{% else %}none{% endif %};">
     <div class="left-section">
@@ -161,31 +201,18 @@
       <form action="/register" method="post" class="register-form">
         <label for="username">Email:</label>
         <input type="email" id="username" name="username" required>
-        
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required oninput="validatePassword(this.value)">
         <label for="confirm_password">Confirm Password:</label>
         <input type="password" id="confirm_password" name="confirm_password" required>
         <div class="password-requirements-box">
-            <!-- List of password requirements -->
-            <ul id="password-requirements">
+          <!-- List of password requirements -->
+          <ul id="password-requirements">
             <li id="req-length">At least 6 characters</li>
             <li id="req-uppercase">At least one uppercase letter</li>
             <li id="req-special">At least one special character (e.g., !@#$%^&amp;*)</li>
-            </ul>
+          </ul>
         </div>
-        
-        <!-- Inline flash messages (if any) will appear here -->
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <div class="flash-messages">
-              {% for message in messages %}
-                <p class="flash-message">{{ message }}</p>
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endwith %}
-        
         <button type="submit">Register</button>
       </form>
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
