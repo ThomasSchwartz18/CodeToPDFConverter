@@ -6,6 +6,9 @@ from db import create_user, get_user_by_username
 from config import UPLOAD_DIR
 from utils import generate_code_pdf, process_zip
 from dotenv import load_dotenv
+import re
+
+EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
 # Create the Flask application
 app = Flask(__name__)
@@ -19,8 +22,8 @@ DATABASE_CONFIG = {
     'host': os.getenv('DB_HOST'),
     'port': os.getenv('DB_PORT')
 }
-print(DATABASE_CONFIG)
-print("DB_HOST from .env:", os.getenv('DB_HOST'))
+# print(DATABASE_CONFIG)
+# print("DB_HOST from .env:", os.getenv('DB_HOST'))
 
 # Generate a secure random secret key using the secrets module
 app.secret_key = secrets.token_hex(16)  # Generates a 32-character hexadecimal string
@@ -62,19 +65,24 @@ def register():
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
-
+        # Validate that the username is a valid email address.
+        if not re.match(EMAIL_REGEX, username):
+            flash("Invalid email address!")
+            return render_template("index.html", section='register-section')
         if password != confirm_password:
             flash("Passwords do not match!")
-            return redirect(url_for('register'))
-
+            return render_template("index.html", section='register-section')
+        # Check if email is already associated with an account.
+        if get_user_by_username(username):
+            flash("Email is already associated with an account!")
+            return render_template("index.html", section='register-section')
         hashed_password = generate_password_hash(password)
         if create_user(username, hashed_password):
             flash("Registration successful! Please log in.")
             return redirect(url_for('login'))
         else:
-            flash("Username already exists!")
-            return redirect(url_for('register'))
-
+            flash("An error occurred during registration!")
+            return render_template("index.html", section='register-section')
     return render_template("index.html", section='register-section')
 
 @app.route("/login", methods=["GET", "POST"])
