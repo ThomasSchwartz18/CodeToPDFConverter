@@ -33,6 +33,34 @@
       video.playbackRate = 0.75; // Change this value to adjust the speed
     });
   </script>
+  <script>
+    function validatePassword(password) {
+      const reqLength = document.getElementById('req-length');
+      const reqUppercase = document.getElementById('req-uppercase');
+      const reqSpecial = document.getElementById('req-special');
+  
+      // Check length requirement
+      if (password.length >= 6) {
+        reqLength.classList.add('valid');
+      } else {
+        reqLength.classList.remove('valid');
+      }
+  
+      // Check for at least one uppercase letter
+      if (/[A-Z]/.test(password)) {
+        reqUppercase.classList.add('valid');
+      } else {
+        reqUppercase.classList.remove('valid');
+      }
+  
+      // Check for at least one special character (non-alphanumeric)
+      if (/[^a-zA-Z0-9]/.test(password)) {
+        reqSpecial.classList.add('valid');
+      } else {
+        reqSpecial.classList.remove('valid');
+      }
+    }
+  </script>  
 </head>
 <body>
   <!-- Navigation Bar -->
@@ -103,6 +131,15 @@
         <input type="text" id="username" name="username" required>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for message in messages %}
+                    <p class="flash-message">{{ message }}</p>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <button type="submit">Login</button>
       </form>
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
@@ -124,10 +161,20 @@
       <form action="/register" method="post" class="register-form">
         <label for="username">Email:</label>
         <input type="email" id="username" name="username" required>
+        
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+        <input type="password" id="password" name="password" required oninput="validatePassword(this.value)">
         <label for="confirm_password">Confirm Password:</label>
         <input type="password" id="confirm_password" name="confirm_password" required>
+        <div class="password-requirements-box">
+            <!-- List of password requirements -->
+            <ul id="password-requirements">
+            <li id="req-length">At least 6 characters</li>
+            <li id="req-uppercase">At least one uppercase letter</li>
+            <li id="req-special">At least one special character (e.g., !@#$%^&amp;*)</li>
+            </ul>
+        </div>
+        
         <!-- Inline flash messages (if any) will appear here -->
         {% with messages = get_flashed_messages() %}
           {% if messages %}
@@ -138,6 +185,7 @@
             </div>
           {% endif %}
         {% endwith %}
+        
         <button type="submit">Register</button>
       </form>
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>

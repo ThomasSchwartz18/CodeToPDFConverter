@@ -1,3 +1,6 @@
+/* ###########################################
+   GLOBAL STYLES & FONT IMPORT
+############################################ */
 @import url('https://fonts.googleapis.com/css2?family=Avenir+Next+LT+Pro:wght@400&display=swap');
 
 body {
@@ -14,7 +17,9 @@ body {
     overflow: hidden;
 }
 
-/* Full-Screen Background Image */
+/* ###########################################
+   FULL-SCREEN BACKGROUND MEDIA
+############################################ */
 .background-video {
     position: fixed;
     top: 0;
@@ -23,9 +28,11 @@ body {
     height: 100%;
     object-fit: cover;
     z-index: -1;
-  }
+}
 
-/* Container for sections */
+/* ###########################################
+   CONTAINER FOR SECTIONS
+############################################ */
 .container {
     display: flex;
     width: 90%;
@@ -35,7 +42,9 @@ body {
     overflow: hidden;
 }
 
-/* Left Section */
+/* ###########################################
+   LEFT SECTION STYLES
+############################################ */
 .left-section {
     flex: 1;
     padding: 20px;
@@ -58,7 +67,9 @@ body {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
-/* Right Section */
+/* ###########################################
+   RIGHT SECTION STYLES
+############################################ */
 .right-section {
     flex: 1;
     background-color: rgba(58, 165, 83, 0.245);
@@ -71,7 +82,9 @@ body {
     align-items: center;
 }
 
-/* Form Styling */
+/* ###########################################
+   FORM STYLING
+############################################ */
 form {
     background: rgba(255, 255, 255, 0);
     padding: 10px;
@@ -84,6 +97,16 @@ form button {
     margin-top: 10px;
 }
 
+.flash-messages .flash-message {
+    color: red;
+    font-weight: bold;
+    margin: 5px 0;
+    text-shadow: 1px 1px 2px black;
+}
+
+/* ###########################################
+   FILE INPUT STYLES
+############################################ */
 input[type="file"] {
     font-size: 16px;
     padding: 2px;
@@ -104,19 +127,28 @@ input[type="file"]::file-selector-button {
     cursor: pointer;
 }
 
+/* ###########################################
+   DOWNLOAD SECTION STYLES
+############################################ */
 .download-section {
     width: 100%;
     text-align: center;
     align-items: center;
 }
 
+/* ###########################################
+   REGISTER FORM SPECIFIC STYLES
+############################################ */
 .register-form {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Button Styling (Applies to all buttons except download) */
+/* ###########################################
+   BUTTON STYLES
+   (Applies to all buttons except download)
+############################################ */
 button,
 .nav-button {
     font-family: "Avenir Next LT Pro", sans-serif;
@@ -137,7 +169,9 @@ button:hover,
     background-color: #ff7300;
 }
 
-/* Special Styling for Download Button */
+/* ###########################################
+   SPECIAL DOWNLOAD BUTTON STYLES
+############################################ */
 .download-btn {
     font-family: "Avenir Next LT Pro", sans-serif;
     font-size: 18px;
@@ -157,7 +191,9 @@ button:hover,
     background-color: #39ff39;
 }
 
-/* Adjusted PDF preview window */
+/* ###########################################
+   PDF PREVIEW WINDOW STYLES
+############################################ */
 #pdf-view-container iframe {
     width: 90%;
     height: 400px;
@@ -165,7 +201,9 @@ button:hover,
     margin-top: 10px;
 }
 
-/* Navigation Bar */
+/* ###########################################
+   NAVIGATION BAR STYLES
+############################################ */
 .navbar {
     display: flex;
     justify-content: flex-end; /* Align buttons to the right */
@@ -189,7 +227,9 @@ button:hover,
     margin-top: 10px;
 }
 
-/* Settings Icon and Dropdown */
+/* ###########################################
+   SETTINGS ICON & DROPDOWN STYLES
+############################################ */
 .settings-dropdown {
     position: relative;
     display: inline-block;
@@ -225,4 +265,26 @@ button:hover,
 
 .settings-dropdown:hover .dropdown-content {
     display: block;
+}
+
+/* ###########################################
+   PASSWORD REQUIREMENTS SECTION
+############################################ */
+.password-requirements-box {
+    text-align: start;
+    text-shadow: 1px 1px 2px black;
+}
+
+#password-requirements {
+    list-style-type: none;
+    padding: 0;
+}
+
+#password-requirements li {
+    color: #ebebeb;
+}
+
+#password-requirements li.valid {
+    color: rgb(122, 217, 122);
+    text-decoration: line-through;
 }

@@ -10,6 +10,20 @@ import re
 
 EMAIL_REGEX = r'^[\w\.-]+@[\w\.-]+\.\w+$'
 
+# check if password meets the requirements.
+import re
+
+def validate_password(password):
+    """Check that password meets the requirements."""
+    if len(password) < 6:
+        return False, "Password must be at least 6 characters long."
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least one uppercase letter."
+    if not re.search(r'[^a-zA-Z0-9]', password):
+        return False, "Password must contain at least one special character."
+    return True, ""
+
+
 # Create the Flask application
 app = Flask(__name__)
 
@@ -65,17 +79,26 @@ def register():
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+
         # Validate that the username is a valid email address.
         if not re.match(EMAIL_REGEX, username):
-            flash("Invalid email address!")
+            flash("Must be a valid email address!")
             return render_template("index.html", section='register-section')
         if password != confirm_password:
             flash("Passwords do not match!")
             return render_template("index.html", section='register-section')
+        
+        # Check password requirements
+        valid, message = validate_password(password)
+        if not valid:
+            flash(message)
+            return render_template("index.html", section='register-section')
+        
         # Check if email is already associated with an account.
         if get_user_by_username(username):
             flash("Email is already associated with an account!")
             return render_template("index.html", section='register-section')
+        
         hashed_password = generate_password_hash(password)
         if create_user(username, hashed_password):
             flash("Registration successful! Please log in.")
@@ -90,16 +113,14 @@ def login():
     if request.method == "POST":
         username = request.form['username']
         password = request.form['password']
-
         user = get_user_by_username(username)
         if user and check_password_hash(user[2], password):
             session['user_id'] = user[0]  # Store user ID in session
             flash("Login successful!")
             return redirect(url_for('index'))
         else:
-            flash("Invalid username or password!")
-            return redirect(url_for('login'))
-
+            flash("Username or Password is incorrect!")
+            return render_template("index.html", section='login-section')
     return render_template("index.html", section='login-section')
 
 @app.route("/logout")
