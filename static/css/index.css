@@ -194,6 +194,11 @@ button:hover,
     background-color: #ff7300;
 }
 
+.sub-button {
+    text-decoration: underline;
+    color: white;
+}
+
 /* ###########################################
    SPECIAL DOWNLOAD BUTTON STYLES
 ############################################ */
@@ -233,7 +238,7 @@ button:hover,
     display: flex;
     justify-content: space-between; /* Align buttons to the left and right */
     align-items: center;
-    padding: 0px 15px;
+    padding: 15px;
     background-color: rgba(0, 0, 0, 0);
     color: white;
     position: fixed;
