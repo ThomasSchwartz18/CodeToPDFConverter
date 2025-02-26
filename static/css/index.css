@@ -231,7 +231,7 @@ button:hover,
 ############################################ */
 .navbar {
     display: flex;
-    justify-content: flex-end; /* Align buttons to the right */
+    justify-content: space-between; /* Align buttons to the left and right */
     align-items: center;
     padding: 0px 15px;
     background-color: rgba(0, 0, 0, 0);
@@ -242,14 +242,16 @@ button:hover,
     z-index: 1000;
 }
 
+.nav-left {
+    display: flex;
+    padding-left: 15px;
+    gap: 10px;
+}
+
 .nav-right {
     display: flex;
     padding-right: 15px;
     gap: 10px;
-}
-
-.nav-button {
-    margin-top: 10px;
 }
 
 /* ###########################################

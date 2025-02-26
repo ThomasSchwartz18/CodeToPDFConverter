@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code to PDF Converter</title>
+  <title>UniDoc</title>
   <link rel="stylesheet" href="../static/css/index.css">
   <script>
     function togglePDFView() {
@@ -15,14 +15,16 @@
       }
     }
     function showSection(sectionId) {
-      // Hide all sections
-      document.getElementById('upload-section').style.display = 'none';
-      document.getElementById('login-section').style.display = 'none';
-      document.getElementById('register-section').style.display = 'none';
-      // Show the selected section
-      if (sectionId) {
-        document.getElementById(sectionId).style.display = 'flex'; // Use flex to maintain layout
-      }
+        // Hide all sections
+        document.getElementById('upload-section').style.display = 'none';
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('register-section').style.display = 'none';
+        document.getElementById('paypal-section').style.display = 'none';
+
+        // Show the selected section
+        if (sectionId) {
+            document.getElementById(sectionId).style.display = 'flex'; // Use flex to maintain layout
+        }
     }
     function goBackToUpload() {
       // Show the upload section and hide login/register sections
@@ -97,8 +99,15 @@
   <!-- Navigation Bar -->
   <nav class="navbar">
     <!-- MOVE THIS TO WHERE THE PAYMENT BUTTONS SHOULD BE.-->
-    <div id="paypal-button-container-P-66R06925PX274844GM67UUJY"></div>
+    <!-- <div id="paypal-button-container-P-66R06925PX274844GM67UUJY"></div> -->
 
+    <div class="nav-left">
+      {% if 'user_id' in session %}
+      <a href="#" class="nav-button" onclick="showSection('paypal-section')">Subscribe</a>
+      {% else %}
+      <a href="#" class="nav-button" onclick="showSection('login-section')">Subscribe</a>
+      {% endif %}
+    </div>
     <div class="nav-right">
       {% if 'user_id' in session %}
       <div class="settings-dropdown">
@@ -189,10 +198,32 @@
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
       <h2>Convert source code into PDF files for easy sharing.</h2>
-      <ul>
-        <li>Upload a text file or a ZIP folder of multiple files.</li>
-        <li>Non-text files will be ignored.</li>
-      </ul>
+      <table class="file-info-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Description</th>
+            <th>File Types</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Supported</td>
+            <td>Files that are processed and included in the PDF.</td>
+            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql</td>
+          </tr>
+          <tr>
+            <td>Ignored</td>
+            <td>Files that are skipped as they are non-text or unsupported for user security.</td>
+            <td>.exe, .dll, .env</td>
+          </tr>
+          <tr>
+            <td>Premium</td>
+            <td>ZIP folders or files requiring subscription for advanced processing.</td>
+            <td>.zip (multiple files)</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <div class="right-section">
       <h1>Login</h1>
@@ -213,10 +244,32 @@
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
       <h2>Convert source code into PDF files for easy sharing.</h2>
-      <ul>
-        <li>Upload a text file or a ZIP folder of multiple files.</li>
-        <li>Non-text files will be ignored.</li>
-      </ul>
+      <table class="file-info-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Description</th>
+            <th>File Types</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Supported</td>
+            <td>Files that are processed and included in the PDF.</td>
+            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql</td>
+          </tr>
+          <tr>
+            <td>Ignored</td>
+            <td>Files that are skipped as they are non-text or unsupported for user security.</td>
+            <td>.exe, .dll, .env</td>
+          </tr>
+          <tr>
+            <td>Premium</td>
+            <td>ZIP folders or files requiring subscription for advanced processing.</td>
+            <td>.zip (multiple files)</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
     <div class="right-section">
       <h1>Register</h1>
@@ -239,6 +292,21 @@
         <button type="submit">Register</button>
       </form>
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
+    </div>
+  </div>
+
+  <!-- PayPal Section -->
+  <div id="paypal-section" class="container" style="display: none;">
+    <div class="left-section">
+        <h1>Let's glide into the future together...</h1>
+        <h2>Convert source code into PDF files for easy sharing.</h2>
+    </div>
+    <div class="right-section">
+        <h1>Subscribe</h1>
+        <p>Subscribe to unlock premium features like ZIP folder uploads.</p>
+        <!-- PayPal Button Container -->
+        <div id="paypal-button-container-P-66R06925PX274844GM67UUJY"></div>
+        <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
     </div>
   </div>
 </body>
