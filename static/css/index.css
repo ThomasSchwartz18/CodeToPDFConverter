@@ -75,14 +75,15 @@ body {
     padding: 8px; /* Optional: add some padding for better readability */
 }
 
+.file-info-table td {
+    background-color: #f2f2f265;
+}
+
 .file-info-table th {
     color: #888888;
-    text-shadow: none;
-}
-  
-.file-info-table th {
     background-color: #f2f2f2a9; /* Optional: add a background color for headers */
     text-align: left;
+    text-shadow: none;
 }
   
 /* ###########################################
