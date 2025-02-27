@@ -76,7 +76,7 @@ body {
 }
 
 .file-info-table td {
-    background-color: #f2f2f265;
+    background-color: rgba(58, 165, 83, 0.245);
 }
 
 .file-info-table th {
@@ -192,11 +192,6 @@ button,
 button:hover,
 .nav-button:hover {
     background-color: #ff7300;
-}
-
-.sub-button {
-    text-decoration: underline;
-    color: white;
 }
 
 /* ###########################################
