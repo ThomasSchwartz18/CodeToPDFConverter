@@ -6,21 +6,11 @@
   <title>UniDoc</title>
   <link rel="stylesheet" href="../static/css/index.css">
   <script>
-    function togglePDFView() {
-      var pdfContainer = document.getElementById("pdf-view-container");
-      if (pdfContainer.style.display === "none") {
-        pdfContainer.style.display = "block";
-      } else {
-        pdfContainer.style.display = "none";
-      }
-    }
     function showSection(sectionId) {
         // Hide all sections
         document.getElementById('upload-section').style.display = 'none';
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('register-section').style.display = 'none';
-        document.getElementById('paypal-section').style.display = 'none';
-
         // Show the selected section
         if (sectionId) {
             document.getElementById(sectionId).style.display = 'flex'; // Use flex to maintain layout
@@ -33,7 +23,6 @@
     document.addEventListener("DOMContentLoaded", function() {
       var video = document.querySelector('.background-video');
       video.playbackRate = 0.75; // Change this value to adjust the speed
-
       // Global Notification Animation
       var notifications = document.querySelectorAll('.alert-notification');
       notifications.forEach(function(notification) {
@@ -51,21 +40,18 @@
       const reqLength = document.getElementById('req-length');
       const reqUppercase = document.getElementById('req-uppercase');
       const reqSpecial = document.getElementById('req-special');
-  
       // Check length requirement
       if (password.length >= 6) {
         reqLength.classList.add('valid');
       } else {
         reqLength.classList.remove('valid');
       }
-  
       // Check for at least one uppercase letter
       if (/[A-Z]/.test(password)) {
         reqUppercase.classList.add('valid');
       } else {
         reqUppercase.classList.remove('valid');
       }
-  
       // Check for at least one special character (non-alphanumeric)
       if (/[^a-zA-Z0-9]/.test(password)) {
         reqSpecial.classList.add('valid');
@@ -74,42 +60,28 @@
       }
     }
   </script>
-  <script src="https://www.paypal.com/sdk/js?client-id=AbHvpEXeqbJPD5uZvtO83bmMzPw9HJqfPD5YWBv_dTecyxfljADuoO7wq8S0D4gxhvotpY_UJw69Mb7_&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
   <script>
-    paypal.Buttons({
-        style: {
-            shape: 'rect',
-            color: 'silver',
-            layout: 'vertical',
-            label: 'subscribe'
-        },
-        createSubscription: function(data, actions) {
-          return actions.subscription.create({
-            /* Creates the subscription */
-            plan_id: 'P-66R06925PX274844GM67UUJY'
-          });
-        },
-        onApprove: function(data, actions) {
-          alert(data.subscriptionID); // You can add optional success message for the subscriber here
-        }
-    }).render('#paypal-button-container-P-66R06925PX274844GM67UUJY'); // Renders the PayPal button
+    function enterView() {
+        document.getElementById('form-section').style.display = 'none';
+        document.getElementById('pdf-view-section').style.display = 'block';
+    }
+
+    function exitView() {
+        document.getElementById('pdf-view-section').style.display = 'none';
+        document.getElementById('form-section').style.display = 'block';
+    }
   </script>
+  <!-- Removed PayPal subscription scripts since we're no longer using them -->
 </head>
 <body>
   <!-- Navigation Bar -->
   <nav class="navbar">
-    <!-- MOVE THIS TO WHERE THE PAYMENT BUTTONS SHOULD BE.-->
-    <!-- <div id="paypal-button-container-P-66R06925PX274844GM67UUJY"></div> -->
-
     <div class="nav-left">
-      {% if 'user_id' in session %}
-      <a href="#" class="nav-button" onclick="showSection('paypal-section')">Subscribe</a>
-      {% else %}
-      <a href="#" class="nav-button" onclick="showSection('login-section')">Subscribe</a>
-      {% endif %}
+      <!-- Direct Donate button (opens in a new tab) -->
+      <a href="https://www.paypal.com/donate/?hosted_button_id=AS22M4RMC5HXL" target="_blank" class="nav-button">Donate</a>
     </div>
     <div class="nav-right">
-      {% if 'user_id' in session %}
+      <!-- {% if 'user_id' in session %}
       <div class="settings-dropdown">
         <img src="../static/images/settings_icon.png" alt="Settings" class="settings-icon">
         <div class="dropdown-content">
@@ -121,10 +93,9 @@
       {% else %}
       <a href="#" class="nav-button" onclick="showSection('login-section')">Login</a>
       <a href="#" class="nav-button" onclick="showSection('register-section')">Register</a>
-      {% endif %}
+      {% endif %} -->
     </div>
   </nav>
-
   <!-- Global Notification Container -->
   {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -135,17 +106,16 @@
       </div>
     {% endif %}
   {% endwith %}
-
   <video autoplay muted loop playsinline class="background-video">
     <source src="../static/images/background_video.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  
   <!-- Upload Section -->
   <div id="upload-section" class="container" style="display: {% if section=='upload-section' %}flex{% else %}none{% endif %};">
+    <!-- Left Section: Intro and File Info Table -->
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
-      <h2>Convert source code into PDF files for easy sharing.</h2>
+      <h2>Convert text documents into PDF files for easy sharing.</h2>
       <table class="file-info-table">
         <thead>
           <tr>
@@ -158,46 +128,80 @@
           <tr>
             <td>Supported</td>
             <td>Files that are processed and included in the PDF.</td>
-            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql, .doc, .docx, .pdf</td>
+            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql, .doc, .docx, .pdf, .zip</td>
           </tr>
           <tr>
             <td>Ignored</td>
             <td>Files that are skipped as they are non-text or unsupported for user security.</td>
             <td>.exe, .dll, .env</td>
-          </tr>
-          <tr>
-            <td>Premium</td>
-            <td>ZIP folders or files requiring subscription for advanced processing.</td>
-            <td>.zip (multiple files)</td>
           </tr>
         </tbody>
       </table>
     </div>
-    
+
+    <!-- Right Section: Upload Form and PDF Preview -->
     <div class="right-section">
-      <form action="/" method="post" enctype="multipart/form-data">
-        <h2>Upload Source Code File or ZIP Folder</h2>
-        <input type="file" name="files" multiple required>
-        <button type="submit">Convert to PDF</button>
-      </form>
-      {% if pdf_url %}
-      <div class="download-section">
-        <h3>View or Download your PDF:</h3>
-        <button onclick="togglePDFView()">View</button>
-        <a href="{{ pdf_url }}" class="pdf-button download-btn" download>Download</a>
-        <div id="pdf-view-container" style="display: none;">
+      <!-- Form and Download Options Container -->
+      <div id="form-section">
+        <form action="/" method="post" enctype="multipart/form-data">
+          <h2>Upload text document file or ZIP Folder</h2>
+          <input type="file" name="files" multiple required>
+          <fieldset>
+            <legend>PDF Settings</legend>
+            <label for="margin">Margin (points):</label>
+            <input type="number" id="margin" name="margin" value="10" min="0">
+            
+            <label for="header_note">Header Note:</label>
+            <input type="text" id="header_note" name="header_note" placeholder="Optional header text">
+            
+            <label for="footer_note">Footer Note:</label>
+            <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text">
+            
+            <label>Orientation:</label>
+            <input type="radio" id="portrait" name="orientation" value="portrait" checked>
+            <label for="portrait">Portrait</label>
+            <input type="radio" id="landscape" name="orientation" value="landscape">
+            <label for="landscape">Landscape</label>
+            
+            <label for="page_size">Page Size:</label>
+            <select id="page_size" name="page_size">
+              <option value="letter" selected>Letter (612 x 792)</option>
+              <option value="a4">A4 (595 x 842)</option>
+              <option value="legal">Legal (612 x 1008)</option>
+            </select>
+          </fieldset>
+          <button type="submit">Convert to PDF</button>
+        </form>
+        {% if pdf_url %}
+        <div class="download-section">
+          <h3>View or Download your PDF:</h3>
+          <!-- Use the new function to enter view mode -->
+          <button onclick="enterView()">View</button>
+          <a href="{{ pdf_url }}" class="pdf-button download-btn" download>Download</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- PDF Preview Container (Initially Hidden) -->
+      <div id="pdf-view-section" style="display: none;">
+        <div class="view-header">
+          <button onclick="exitView()">Exit View</button>
+          <a href="{{ pdf_url }}" class="pdf-button download-btn" download>Download</a>
+        </div>
+        <div id="pdf-view-container">
           <iframe src="{{ view_url }}"></iframe>
         </div>
       </div>
-      {% endif %}
     </div>
   </div>
-  
-  <!-- Login Section -->
+
+    
+  <!-- UNCOMMENT TO IMPLEMENT LOGIN AND REGISTER SCREENS IN FUTURE. -->
+  <!-- Login Section
   <div id="login-section" class="container" style="display: {% if section=='login-section' %}flex{% else %}none{% endif %};">
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
-      <h2>Convert source code into PDF files for easy sharing.</h2>
+      <h2>Convert text documents into PDF files for easy sharing.</h2>
       <table class="file-info-table">
         <thead>
           <tr>
@@ -210,17 +214,12 @@
           <tr>
             <td>Supported</td>
             <td>Files that are processed and included in the PDF.</td>
-            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql, .doc, .docx, .pdf</td>
+            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql, .doc, .docx, .pdf, .zip</td>
           </tr>
           <tr>
             <td>Ignored</td>
             <td>Files that are skipped as they are non-text or unsupported for user security.</td>
             <td>.exe, .dll, .env</td>
-          </tr>
-          <tr>
-            <td>Premium</td>
-            <td>ZIP folders or files requiring subscription for advanced processing.</td>
-            <td>.zip (multiple files)</td>
           </tr>
         </tbody>
       </table>
@@ -238,12 +237,11 @@
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
     </div>
   </div>
-  
-  <!-- Register Section -->
+  <!-- Register Section
   <div id="register-section" class="container" style="display: {% if section=='register-section' %}flex{% else %}none{% endif %};">
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
-      <h2>Convert source code into PDF files for easy sharing.</h2>
+      <h2>Convert text documents into PDF files for easy sharing.</h2>
       <table class="file-info-table">
         <thead>
           <tr>
@@ -263,11 +261,6 @@
             <td>Files that are skipped as they are non-text or unsupported for user security.</td>
             <td>.exe, .dll, .env</td>
           </tr>
-          <tr>
-            <td>Premium</td>
-            <td>ZIP folders or files requiring subscription for advanced processing.</td>
-            <td>.zip (multiple files)</td>
-          </tr>
         </tbody>
       </table>
     </div>
@@ -282,7 +275,7 @@
         <label for="confirm_password">Confirm Password:</label>
         <input type="password" id="confirm_password" name="confirm_password" required>
         <div class="password-requirements-box">
-          <!-- List of password requirements -->
+          <!-- List of password requirements
           <ul id="password-requirements">
             <li id="req-length">At least 6 characters</li>
             <li id="req-uppercase">At least one uppercase letter</li>
@@ -293,21 +286,6 @@
       </form>
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
     </div>
-  </div>
-
-  <!-- PayPal Section -->
-  <div id="paypal-section" class="container" style="display: none;">
-    <div class="left-section">
-        <h1>Let's glide into the future together...</h1>
-        <h2>Convert source code into PDF files for easy sharing.</h2>
-    </div>
-    <div class="right-section">
-        <h1>Subscribe</h1>
-        <p>Subscribe to unlock premium features like ZIP folder uploads.</p>
-        <!-- PayPal Button Container -->
-        <div id="paypal-button-container-P-66R06925PX274844GM67UUJY"></div>
-        <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
-    </div>
-  </div>
+  </div> -->
 </body>
 </html>
