@@ -54,7 +54,7 @@ def index():
             page_width, page_height = 612, 792
         if orientation == "landscape":
             page_width, page_height = page_height, page_width
-        output_pdf_path = os.path.join(UPLOAD_DIR, "UniDoc.pdf")
+        output_pdf_path = os.path.join(UPLOAD_DIR, "UnifyDoc.pdf")
         generate_code_pdf(
             file_paths,
             output_pdf_path,
@@ -69,12 +69,12 @@ def index():
 
 @app.route("/download")
 def download_pdf():
-    output_pdf_path = os.path.join(UPLOAD_DIR, "UniDoc.pdf")
-    return send_file(output_pdf_path, as_attachment=True, download_name="UniDoc.pdf")
+    output_pdf_path = os.path.join(UPLOAD_DIR, "UnifyDoc.pdf")
+    return send_file(output_pdf_path, as_attachment=True, download_name="UnifyDoc.pdf")
 
 @app.route("/view")
 def view_pdf():
-    output_pdf_path = os.path.join(UPLOAD_DIR, "UniDoc.pdf")
+    output_pdf_path = os.path.join(UPLOAD_DIR, "UnifyDoc.pdf")
     return send_file(output_pdf_path, as_attachment=False)
 
 if __name__ == "__main__":
