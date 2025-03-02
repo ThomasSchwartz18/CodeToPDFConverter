@@ -115,7 +115,7 @@
     <!-- Left Section: Intro and File Info Table -->
     <div class="left-section">
       <h1>Let's glide into the future together...</h1>
-      <h2>Convert text documents into PDF files for easy sharing.</h2>
+      <h2>Combine text documents into PDF files for easy storage and sharing.</h2>
       <table class="file-info-table">
         <thead>
           <tr>
@@ -145,23 +145,23 @@
       <div id="form-section">
         <form action="/" method="post" enctype="multipart/form-data">
           <h2>Upload text document file or ZIP Folder</h2>
-          <input type="file" name="files" multiple required>
+          <input type="file" name="files" class="file-input" multiple required>
           <fieldset>
             <legend>PDF Settings</legend>
             <label for="margin">Margin (points):</label>
-            <input type="number" id="margin" name="margin" value="10" min="0">
+            <input type="number" id="margin" name="margin" value="10" min="0"><br>
             
             <label for="header_note">Header Note:</label>
-            <input type="text" id="header_note" name="header_note" placeholder="Optional header text">
+            <input type="text" id="header_note" name="header_note" placeholder="Optional header text"><br>
             
             <label for="footer_note">Footer Note:</label>
-            <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text">
+            <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text"><br>
             
             <label>Orientation:</label>
             <input type="radio" id="portrait" name="orientation" value="portrait" checked>
             <label for="portrait">Portrait</label>
             <input type="radio" id="landscape" name="orientation" value="landscape">
-            <label for="landscape">Landscape</label>
+            <label for="landscape">Landscape</label><br>
             
             <label for="page_size">Page Size:</label>
             <select id="page_size" name="page_size">
@@ -195,7 +195,6 @@
     </div>
   </div>
 
-    
   <!-- UNCOMMENT TO IMPLEMENT LOGIN AND REGISTER SCREENS IN FUTURE. -->
   <!-- Login Section
   <div id="login-section" class="container" style="display: {% if section=='login-section' %}flex{% else %}none{% endif %};">
@@ -287,5 +286,9 @@
       <button class="nav-button" onclick="goBackToUpload()">Go Back</button>
     </div>
   </div> -->
+  <footer>
+    <p>Last updated: March 2, 2025</p>
+    <p>&copy; 2025 NT Development</p>
+  </footer>
 </body>
 </html>

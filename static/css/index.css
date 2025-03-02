@@ -99,17 +99,29 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+}
+
+.view-header {
+    width: 100%;
+    text-align: center;
+    align-items: center;
 }
 
 /* ###########################################
    FORM STYLING
 ############################################ */
-form {
-    background: rgba(255, 255, 255, 0);
-    padding: 10px;
-    border-radius: 10px;
-    width: 90%;
+#form-section {
+    width: 90%;      /* less than 100% allows it to be centered within .right-section */
+    margin: 0 auto;  /* centers the div within its parent */
     text-align: center;
+}
+
+form {
+    border-radius: 10px;
+    width: 100%;     /* fill the container (#form-section) */
+    text-align: center;
+    /* margin: 0 auto;  Not needed if the container is already centered */
 }
 
 form button {
@@ -131,10 +143,10 @@ input[type="file"] {
     padding: 2px;
     border: 1px solid #ebebeb;
     border-radius: 5px;
-    width: 100%;
     background-color: transparent;
     color: #ebebeb;
     text-shadow: 2px 1px 3px rgba(0,0,0,0.75);
+    width: 100%;
 }
 
 input[type="file"]::file-selector-button {
@@ -353,3 +365,19 @@ button:hover,
     bottom: 20px;  /* end position */
     opacity: 1;
 }
+
+/* ###########################################
+   FOOTER STYLES
+############################################ */
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    padding: 1px 0;
+    text-shadow: 1px 1px 1px black;
+    color: #fff;
+    font-size: 10px;
+    z-index: 1001; /* Make sure it's above other elements if necessary */
+  }
+  
