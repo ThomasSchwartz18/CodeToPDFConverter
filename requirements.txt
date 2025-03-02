@@ -1,4 +1,3 @@
 Flask
 PyMuPDF
-python-dotenv
 python-docx
