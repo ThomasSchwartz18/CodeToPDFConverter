@@ -11,6 +11,7 @@ The **Code to PDF Converter** is a simple web-based application that allows user
 - **Web-Based Application**: Accessible from any browser.
 
 ## Installation
+
 ### Prerequisites
 Ensure you have the following installed on your system:
 - Python 3.x
@@ -22,49 +23,9 @@ Ensure you have the following installed on your system:
 # Clone the repository
 git clone https://github.com/your-repo/code-to-pdf.git
 cd code-to-pdf
-
 # Install required dependencies
 pip install -r requirements.txt
-
 # Run the application
 python app.py
-
-# Open a browser and navigate to
+# Open a browser and navigate to:
 echo "Server running at http://localhost:5000/"
-```
-
-## Usage
-1. **Upload Code Files or ZIP Folder**
-2. **Convert to PDF**
-3. **View or Download the Generated PDF**
-
-## File Structure
-```sh
-code-to-pdf/
-├── app.py           # Main Flask application
-├── config.py        # Configuration settings
-├── utils.py         # Helper functions for processing files
-├── static/
-│   ├── index.css    # Stylesheet for UI
-├── templates/
-│   ├── index.html   # HTML template
-├── uploads/         # Directory for uploaded files
-├── requirements.txt # Dependencies
-├── README.md        # Project documentation
-```
-
-## Contributing
-```sh
-# Fork the repository
-# Create a feature branch
-git checkout -b feature-branch
-
-# Commit your changes
-git commit -m 'Add new feature'
-
-# Push to the branch
-git push origin feature-branch
-
-# Submit a Pull Request
-```
-

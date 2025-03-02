@@ -1,6 +1,4 @@
 Flask
 PyMuPDF
-psycopg2-binary
 python-dotenv
 python-docx
-psycopg2
