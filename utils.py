@@ -56,9 +56,32 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", fo
         y_position += line_height * 2
 
         if file_extension in IMAGE_EXTENSIONS:
-            # Handle image files (assets)
-            y_position += line_height * 2
-            page.insert_text((margin, y_position), "This file is an asset.", fontsize=10, fontname="courier")
+            try:
+                # Open a new page if needed
+                if y_position + 200 > page_height - margin:  # Adjust for new page
+                    page = doc.new_page(width=page_width, height=page_height)
+                    y_position = margin
+
+                # Define image size (Adjust width and height as needed)
+                img_width = (page_width - 2 * margin) * 0.5  # 50% of page width
+                img_height = img_width * 0.75  # Maintain aspect ratio
+
+                # Center image horizontally
+                img_x0 = (page_width - img_width) / 2
+                img_y0 = y_position
+
+                # Define image rectangle
+                img_rect = fitz.Rect(img_x0, img_y0, img_x0 + img_width, img_y0 + img_height)
+
+                # Insert image
+                page.insert_image(img_rect, filename=file_path)
+
+                # Move y_position down for next content
+                y_position += img_height + 20  # Add spacing after image
+
+            except Exception as e:
+                print(f"Error processing image {file_path}: {e}")
+
         elif file_extension == ".pdf":
             try:
                 pdf_in = fitz.open(file_path)
