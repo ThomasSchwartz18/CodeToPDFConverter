@@ -206,6 +206,10 @@ button:hover,
     background-color: #ff7300;
 }
 
+.nav-right img {
+    width: 30px;
+}
+
 /* ###########################################
    SPECIAL DOWNLOAD BUTTON STYLES
 ############################################ */
