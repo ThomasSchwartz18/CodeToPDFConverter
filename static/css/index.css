@@ -209,6 +209,8 @@ button:hover,
 .nav-right a {
     text-decoration: none;
     color: black;
+    height: 100%;
+    vertical-align: middle;
 }
 
 .nav-right img {
