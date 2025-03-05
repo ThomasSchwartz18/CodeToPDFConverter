@@ -86,27 +86,14 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", fo
             try:
                 pdf_in = fitz.open(file_path)
                 for pdf_page in pdf_in:
-                    text = pdf_page.get_text()
-                    for line in text.splitlines():
-                        wrapped_lines = textwrap.wrap(line, width=max_chars_per_line)
-                        for wrapped_line in wrapped_lines:
-                            # Reserve space at bottom for footer note if provided
-                            footer_space = margin + (line_height * 2 if footer_note else 0)
-                            if y_position + line_height > page_height - footer_space:
-                                if footer_note:
-                                    page.insert_text((margin, page_height - margin - line_height), footer_note, fontsize=10, fontname="courier-oblique")
-                                page = doc.new_page(width=page_width, height=page_height)
-                                y_position = margin
-                                if header_note:
-                                    page.insert_text((margin, y_position), header_note, fontsize=12, fontname="courier-bold")
-                                    y_position += line_height * 2
-                            page.insert_text((margin, y_position), wrapped_line, fontsize=font_size, fontname="courier")
-                            y_position += line_height
-                    y_position += line_height * 2
+                    # Clone the entire page with formatting
+                    new_page = doc.new_page(width=page_width, height=page_height)
+                    new_page.show_pdf_page(new_page.rect, pdf_in, pdf_page.number)
                 pdf_in.close()
             except Exception as e:
                 print(f"Error processing PDF {file_path}: {e}")
                 continue
+            
         else:
             try:
                 if file_extension == ".docx":
