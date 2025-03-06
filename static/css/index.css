@@ -428,4 +428,113 @@ footer {
     font-size: 10px;
     z-index: 1001; /* Make sure it's above other elements if necessary */
   }
-  
+
+/* Adjust font sizes for screens between 1600px and 1024px */
+@media screen and (max-width: 1600px) and (min-width: 1024px) {
+    body {
+        font-size: 14px; /* Adjust base font size */
+    }
+
+    .left-section h1 {
+        font-size: 72px; /* Reduce the size of the main heading */
+    }
+
+    .file-info-table th,
+    .file-info-table td {
+        font-size: 12px; /* Reduce table font size */
+    }
+
+    .right-section h2 {
+        font-size: 20px; /* Reduce the size of the form heading */
+    }
+
+    .form-row label {
+        font-size: 14px; /* Reduce label font size */
+    }
+
+    .form-row input,
+    .form-row select {
+        font-size: 14px; /* Reduce input font size */
+    }
+
+    button,
+    .nav-button {
+        font-size: 16px; /* Reduce button font size */
+    }
+}
+
+/* Adjust layout for screens smaller than 1024px (iPad to phone resolutions) */
+@media screen and (max-width: 1024px) {
+    .container {
+        flex-direction: column; /* Stack sections vertically */
+    }
+
+    .left-section {
+        flex: 1; /* Allow the left section to take full width */
+        text-align: center; /* Center align text */
+    }
+
+    .right-section {
+        display: none; /* Hide the right section */
+    }
+
+    /* Show a message suggesting to visit the site on a computer */
+    .left-section::after {
+        content: "Visit site on a computer for full use!";
+        display: block;
+        margin-top: 20px;
+        font-size: 18px;
+        color: #ff914d;
+        font-weight: bold;
+    }
+
+    /* Adjust font sizes for smaller screens */
+    .left-section h1 {
+        font-size: 48px; /* Further reduce the size of the main heading */
+    }
+
+    .file-info-table th,
+    .file-info-table td {
+        font-size: 12px; /* Reduce table font size */
+    }
+
+    .form-row label {
+        font-size: 14px; /* Reduce label font size */
+    }
+
+    .form-row input,
+    .form-row select {
+        font-size: 14px; /* Reduce input font size */
+    }
+
+    button,
+    .nav-button {
+        font-size: 16px; /* Reduce button font size */
+    }
+}
+
+/* Adjust layout for screens smaller than 768px (phone resolutions) */
+@media screen and (max-width: 768px) {
+    .left-section h1 {
+        font-size: 36px; /* Further reduce the size of the main heading */
+    }
+
+    .file-info-table th,
+    .file-info-table td {
+        font-size: 10px; /* Further reduce table font size */
+    }
+
+    .form-row label {
+        font-size: 12px; /* Further reduce label font size */
+    }
+
+    .form-row input,
+    .form-row select {
+        font-size: 12px; /* Further reduce input font size */
+    }
+
+    button,
+    .nav-button {
+        font-size: 14px; /* Further reduce button font size */
+    }
+}
