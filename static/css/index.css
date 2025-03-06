@@ -486,11 +486,13 @@ footer {
         font-size: 18px;
         color: #ff914d;
         font-weight: bold;
+        text-shadow: 1px 1px 1px black;
     }
 
     /* Adjust font sizes for smaller screens */
     .left-section h1 {
         font-size: 48px; /* Further reduce the size of the main heading */
+        margin-bottom: 20px;
     }
 
     .file-info-table th,
@@ -536,5 +538,13 @@ footer {
     button,
     .nav-button {
         font-size: 14px; /* Further reduce button font size */
+    }
+
+    .nav-left a {
+        font-size: 10px;
+    }
+
+    .nav-right a {
+        font-size: 10px;
     }
 }
