@@ -167,6 +167,41 @@ input[type="file"]::file-selector-button {
     align-items: center;
 }
 
+fieldset {
+    width: 90%;              /* Adjust the width as needed */
+    margin: auto;            /* Centers the fieldset on the page */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+}
+
+fieldset legend {
+    align-self: center;      /* Centers the legend */
+    text-align: center;
+    margin-bottom: 0.5em;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    /* justify-content: space-between; */
+}
+
+.form-row label {
+    flex: 0 0 50%;           /* Reserve 40% of the width for the label */
+    text-align: left;
+}
+
+.form-row input,
+.form-row select {
+    flex: 1;
+    justify-content: left;                 /* Inputs take up the remaining space */
+}
+
+.orientation-selection {
+    justify-content: start;
+}
+
 /* ###########################################
    REGISTER FORM SPECIFIC STYLES
 ############################################ */

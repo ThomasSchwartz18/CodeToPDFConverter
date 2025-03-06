@@ -54,6 +54,10 @@ def index():
             page_width, page_height = 612, 792
         if orientation == "landscape":
             page_width, page_height = page_height, page_width
+        # Get the new PDF settings
+        show_file_info = True if request.form.get("show_file_info") else False
+        pdf_name = request.form.get("pdf_name", "UnifyDoc.pdf")
+        
         output_pdf_path = os.path.join(UPLOAD_DIR, "UnifyDoc.pdf")
         generate_code_pdf(
             file_paths,
@@ -62,15 +66,20 @@ def index():
             header_note=header_note,
             footer_note=footer_note,
             orientation=orientation,
-            page_size=(page_width, page_height)
+            page_size=(page_width, page_height),
+            show_file_info=show_file_info  # New parameter
         )
-        return render_template("index.html", pdf_url="/download", view_url="/view", section=section)
+        # Pass the custom PDF name via query parameter
+        return render_template("index.html", pdf_url=f"/download?pdf_name={pdf_name}",
+                               view_url="/view", section=section)
     return render_template("index.html", pdf_url=None, view_url=None, section=section)
 
 @app.route("/download")
 def download_pdf():
     output_pdf_path = os.path.join(UPLOAD_DIR, "UnifyDoc.pdf")
-    return send_file(output_pdf_path, as_attachment=True, download_name="UnifyDoc.pdf")
+    # Use the custom PDF name if provided
+    download_name = request.args.get("pdf_name", "UnifyDoc.pdf")
+    return send_file(output_pdf_path, as_attachment=True, download_name=download_name)
 
 @app.route("/view")
 def view_pdf():

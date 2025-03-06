@@ -124,28 +124,44 @@
           <input type="file" name="files" class="file-input" multiple required>
           <fieldset>
             <legend>PDF Settings</legend>
-            <label for="margin">Margin (points):</label>
-            <input type="number" id="margin" name="margin" value="10" min="0"><br>
-            
-            <label for="header_note">Header Note:</label>
-            <input type="text" id="header_note" name="header_note" placeholder="Optional header text"><br>
-            
-            <label for="footer_note">Footer Note:</label>
-            <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text"><br>
-            
-            <label>Orientation:</label>
-            <input type="radio" id="portrait" name="orientation" value="portrait" checked>
-            <label for="portrait">Portrait</label>
-            <input type="radio" id="landscape" name="orientation" value="landscape">
-            <label for="landscape">Landscape</label><br>
-            
-            <label for="page_size">Page Size:</label>
-            <select id="page_size" name="page_size">
-              <option value="letter" selected>Letter (612 x 792)</option>
-              <option value="a4">A4 (595 x 842)</option>
-              <option value="legal">Legal (612 x 1008)</option>
-            </select>
-          </fieldset>
+            <div class="form-row">
+              <label for="show_file_info">Display file name and file path:</label>
+              <input type="checkbox" id="show_file_info" name="show_file_info" checked>
+            </div>
+            <div class="form-row">
+              <label for="pdf_name">Download PDF Name:</label>
+              <input type="text" id="pdf_name" name="pdf_name" value="UnifyDoc.pdf">
+            </div>
+            <div class="form-row">
+              <label for="margin">Margin (points):</label>
+              <input type="number" id="margin" name="margin" value="10" min="0">
+            </div>
+            <div class="form-row">
+              <label for="header_note">Header Note:</label>
+              <input type="text" id="header_note" name="header_note" placeholder="Optional header text">
+            </div>
+            <div class="form-row">
+              <label for="footer_note">Footer Note:</label>
+              <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text">
+            </div>
+            <div class="form-row">
+              <label>Orientation:</label>
+              <div class="orientation-selection">
+                <input type="radio" id="portrait" name="orientation" value="portrait" checked>
+                <label for="portrait">Portrait</label>
+                <input type="radio" id="landscape" name="orientation" value="landscape">
+                <label for="landscape">Landscape</label>
+              </div>
+            </div>
+            <div class="form-row">
+              <label for="page_size">Page Size:</label>
+              <select id="page_size" name="page_size">
+                <option value="letter" selected>Letter (612 x 792)</option>
+                <option value="a4">A4 (595 x 842)</option>
+                <option value="legal">Legal (612 x 1008)</option>
+              </select>
+            </div>
+          </fieldset>          
           <button type="submit">Convert to PDF</button>
         </form>
         {% if pdf_url %}

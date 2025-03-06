@@ -5,7 +5,9 @@ import textwrap
 from docx import Document  # For handling Word documents
 from config import UPLOAD_DIR, IMAGE_EXTENSIONS, TEXT_EXTENSIONS
 
-def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", footer_note="", orientation="portrait", page_size=(612,792)):
+def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="",
+                      footer_note="", orientation="portrait", page_size=(612,792),
+                      show_file_info=True):
     """
     Generates a PDF from the provided file paths.
     Supports text files, Word documents (.docx), PDFs, and image files.
@@ -31,7 +33,8 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", fo
         if ".venv" in file_path.split(os.sep) or file_name.startswith(".__") or file_name.startswith("._") or file_name == "paypal_code.txt":
             continue
         file_extension = os.path.splitext(file_name)[1].lower()
-        if file_extension not in TEXT_EXTENSIONS and file_extension not in IMAGE_EXTENSIONS:
+        # Allow PDFs along with text and images.
+        if file_extension not in TEXT_EXTENSIONS and file_extension not in IMAGE_EXTENSIONS and file_extension != ".pdf":
             continue
 
         # Extract relative path (only the part after the uploads directory)
@@ -40,7 +43,20 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", fo
         if upload_index != -1:
             relative_path = file_path[upload_index + len("uploads") + 1:]  # Trim path up to 'uploads/'
 
-        # Create a new page for the file
+        # If the file is a PDF, process it without creating an extra blank page.
+        if file_extension == ".pdf":
+            try:
+                pdf_in = fitz.open(file_path)
+                for pdf_page in pdf_in:
+                    new_page = doc.new_page(width=page_width, height=page_height)
+                    new_page.show_pdf_page(new_page.rect, pdf_in, pdf_page.number)
+                pdf_in.close()
+            except Exception as e:
+                print(f"Error processing PDF {file_path}: {e}")
+                continue
+            continue  # Skip the rest of the loop for PDF files
+
+        # Create a new page for non-PDF files
         page = doc.new_page(width=page_width, height=page_height)
         y_position = margin
 
@@ -48,12 +64,20 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", fo
         if header_note:
             page.insert_text((margin, y_position), header_note, fontsize=12, fontname="courier-bold")
             y_position += line_height * 2
-
-        # Insert file name and path
-        page.insert_text((margin, y_position), f"File: {file_name}", fontsize=12, fontname="courier-bold")
-        y_position += line_height * 2
-        page.insert_text((margin, y_position), f"File Path: {relative_path}", fontsize=10, fontname="courier-bold")
-        y_position += line_height * 2
+            
+        # Only display file info if enabled
+        if show_file_info:
+            page.insert_text((margin, y_position), f"File: {file_name}",
+                             fontsize=12, fontname="courier-bold")
+            y_position += line_height * 2
+            # Compute relative file path if needed
+            relative_path = file_path
+            upload_index = file_path.find("uploads")
+            if upload_index != -1:
+                relative_path = file_path[upload_index + len("uploads") + 1:]
+            page.insert_text((margin, y_position), f"File Path: {relative_path}",
+                             fontsize=10, fontname="courier-bold")
+            y_position += line_height * 2
 
         if file_extension in IMAGE_EXTENSIONS:
             try:
@@ -82,18 +106,6 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="", fo
             except Exception as e:
                 print(f"Error processing image {file_path}: {e}")
 
-        elif file_extension == ".pdf":
-            try:
-                pdf_in = fitz.open(file_path)
-                for pdf_page in pdf_in:
-                    # Clone the entire page with formatting
-                    new_page = doc.new_page(width=page_width, height=page_height)
-                    new_page.show_pdf_page(new_page.rect, pdf_in, pdf_page.number)
-                pdf_in.close()
-            except Exception as e:
-                print(f"Error processing PDF {file_path}: {e}")
-                continue
-            
         else:
             try:
                 if file_extension == ".docx":

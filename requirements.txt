@@ -2,3 +2,4 @@ Flask
 PyMuPDF
 python-docx
 Gunicorn
+docx2pdf
