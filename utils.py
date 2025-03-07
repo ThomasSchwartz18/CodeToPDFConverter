@@ -5,6 +5,18 @@ import textwrap
 from docx import Document  # For handling Word documents
 from config import UPLOAD_DIR, IMAGE_EXTENSIONS, TEXT_EXTENSIONS
 
+def insert_page_header(page, y_position, header_note, file_name, relative_path, line_height, margin, show_file_info):
+    """Helper to insert header note and file info; returns updated y_position."""
+    if header_note:
+        page.insert_text((margin, y_position), header_note, fontsize=12, fontname="courier-bold")
+        y_position += line_height * 2
+    if show_file_info:
+        page.insert_text((margin, y_position), f"File: {file_name}", fontsize=12, fontname="courier-bold")
+        y_position += line_height * 2
+        page.insert_text((margin, y_position), f"File Path: {relative_path}", fontsize=10, fontname="courier-bold")
+        y_position += line_height * 2
+    return y_position
+
 def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="",
                       footer_note="", orientation="portrait", page_size=(612,792),
                       show_file_info=True):
@@ -19,31 +31,31 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="",
       - orientation: 'portrait' or 'landscape' (used in app.py to set page_size)
       - page_size: tuple (width, height) defining the page dimensions
     """
-    # Unpack page dimensions from page_size tuple
     page_width, page_height = page_size
     font_size = 10
     line_height = 12
     max_chars_per_line = 90
-
+    reserved_space = margin + (line_height * 2 if footer_note else 0)
+    
     doc = fitz.open()
 
     for file_path in file_paths:
         file_name = os.path.basename(file_path)
-        # Skip any files in a .venv directory or with specific patterns
-        if ".venv" in file_path.split(os.sep) or file_name.startswith(".__") or file_name.startswith("._") or file_name == "paypal_code.txt":
+        # Skip files in .venv or with specific problematic prefixes.
+        if ".venv" in file_path.split(os.sep) or file_name.startswith(".__") or file_name.startswith("._"):
             continue
+
         file_extension = os.path.splitext(file_name)[1].lower()
-        # Allow PDFs along with text and images.
         if file_extension not in TEXT_EXTENSIONS and file_extension not in IMAGE_EXTENSIONS and file_extension != ".pdf":
             continue
 
-        # Extract relative path (only the part after the uploads directory)
-        relative_path = file_path
-        upload_index = file_path.find("uploads")
-        if upload_index != -1:
-            relative_path = file_path[upload_index + len("uploads") + 1:]  # Trim path up to 'uploads/'
+        # Compute a relative path (using os.path.relpath if possible)
+        if UPLOAD_DIR in file_path:
+            relative_path = os.path.relpath(file_path, UPLOAD_DIR)
+        else:
+            relative_path = file_path
 
-        # If the file is a PDF, process it without creating an extra blank page.
+        # Process PDF files without adding extra blank pages.
         if file_extension == ".pdf":
             try:
                 pdf_in = fitz.open(file_path)
@@ -53,103 +65,87 @@ def generate_code_pdf(file_paths, output_pdf_path, margin=10, header_note="",
                 pdf_in.close()
             except Exception as e:
                 print(f"Error processing PDF {file_path}: {e}")
-                continue
-            continue  # Skip the rest of the loop for PDF files
+            continue
 
-        # Create a new page for non-PDF files
+        # Create a new page for non-PDF files.
         page = doc.new_page(width=page_width, height=page_height)
         y_position = margin
 
-        # Insert header note (if provided)
-        if header_note:
-            page.insert_text((margin, y_position), header_note, fontsize=12, fontname="courier-bold")
-            y_position += line_height * 2
-            
-        # Only display file info if enabled
-        if show_file_info:
-            page.insert_text((margin, y_position), f"File: {file_name}",
-                             fontsize=12, fontname="courier-bold")
-            y_position += line_height * 2
-            # Compute relative file path if needed
-            relative_path = file_path
-            upload_index = file_path.find("uploads")
-            if upload_index != -1:
-                relative_path = file_path[upload_index + len("uploads") + 1:]
-            page.insert_text((margin, y_position), f"File Path: {relative_path}",
-                             fontsize=10, fontname="courier-bold")
-            y_position += line_height * 2
+        # Insert header and file info once.
+        y_position = insert_page_header(page, y_position, header_note, file_name, relative_path, line_height, margin, show_file_info)
 
         if file_extension in IMAGE_EXTENSIONS:
             try:
-                # Open a new page if needed
-                if y_position + 200 > page_height - margin:  # Adjust for new page
+                if y_position + 200 > page_height - margin:
                     page = doc.new_page(width=page_width, height=page_height)
                     y_position = margin
-
-                # Define image size (Adjust width and height as needed)
-                img_width = (page_width - 2 * margin) * 0.5  # 50% of page width
-                img_height = img_width * 0.75  # Maintain aspect ratio
-
-                # Center image horizontally
+                # Calculate image dimensions and center it.
+                img_width = (page_width - 2 * margin) * 0.5
+                img_height = img_width * 0.75
                 img_x0 = (page_width - img_width) / 2
                 img_y0 = y_position
-
-                # Define image rectangle
                 img_rect = fitz.Rect(img_x0, img_y0, img_x0 + img_width, img_y0 + img_height)
-
-                # Insert image
                 page.insert_image(img_rect, filename=file_path)
-
-                # Move y_position down for next content
-                y_position += img_height + 20  # Add spacing after image
-
+                y_position += img_height + 20
             except Exception as e:
                 print(f"Error processing image {file_path}: {e}")
-
         else:
             try:
                 if file_extension == ".docx":
                     docx_document = Document(file_path)
-                    content = "\n".join([para.text for para in docx_document.paragraphs])
+                    content = "\n".join(para.text for para in docx_document.paragraphs)
                 else:
                     with open(file_path, "r", encoding="utf-8") as file:
                         content = file.read()
                 for line in content.splitlines():
                     wrapped_lines = textwrap.wrap(line, width=max_chars_per_line)
                     for wrapped_line in wrapped_lines:
-                        footer_space = margin + (line_height * 2 if footer_note else 0)
-                        if y_position + line_height > page_height - footer_space:
+                        if y_position + line_height > page_height - reserved_space:
                             if footer_note:
-                                page.insert_text((margin, page_height - margin - line_height), footer_note, fontsize=10, fontname="courier-oblique")
+                                page.insert_text((margin, page_height - margin - line_height),
+                                                 footer_note, fontsize=10, fontname="courier-oblique")
+                            # Start a new page and reinsert header info.
                             page = doc.new_page(width=page_width, height=page_height)
                             y_position = margin
-                            if header_note:
-                                page.insert_text((margin, y_position), header_note, fontsize=12, fontname="courier-bold")
-                                y_position += line_height * 2
+                            y_position = insert_page_header(page, y_position, header_note, file_name, relative_path, line_height, margin, show_file_info)
                         page.insert_text((margin, y_position), wrapped_line, fontsize=font_size, fontname="courier")
                         y_position += line_height
             except Exception as e:
                 print(f"Error processing {file_path}: {e}")
                 continue
 
-        # At the end of the file, add the footer note if provided and if space allows
+        # Append footer note at the end of the file's content.
         if footer_note:
             if y_position + line_height <= page_height - margin:
-                page.insert_text((margin, page_height - margin - line_height), footer_note, fontsize=10, fontname="courier-oblique")
+                page.insert_text((margin, page_height - margin - line_height),
+                                 footer_note, fontsize=10, fontname="courier-oblique")
             else:
                 page = doc.new_page(width=page_width, height=page_height)
-                page.insert_text((margin, page_height - margin - line_height), footer_note, fontsize=10, fontname="courier-oblique")
+                page.insert_text((margin, page_height - margin - line_height),
+                                 footer_note, fontsize=10, fontname="courier-oblique")
 
     doc.save(output_pdf_path)
     doc.close()
 
+def is_safe_path(basedir, path, follow_symlinks=True):
+    # Resolve the absolute path and compare it with the base directory.
+    if follow_symlinks:
+        return os.path.realpath(path).startswith(os.path.realpath(basedir))
+    return os.path.abspath(path).startswith(os.path.abspath(basedir))
+
 def process_zip(zip_path):
     """
-    Extracts files from a ZIP folder and returns a list of file paths.
+    Extracts files from a ZIP folder and returns a list of file paths, ensuring no directory traversal.
     """
     extracted_folder = os.path.join(UPLOAD_DIR, os.path.basename(zip_path).replace(".zip", ""))
     os.makedirs(extracted_folder, exist_ok=True)
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
-        zip_ref.extractall(extracted_folder)
-    # Return a list of all extracted file paths
-    return [os.path.join(root, file) for root, _, files in os.walk(extracted_folder) for file in files]
+        for member in zip_ref.infolist():
+            member_path = os.path.join(extracted_folder, member.filename)
+            if not is_safe_path(extracted_folder, member_path):
+                print(f"Skipped unsafe file path: {member.filename}")
+                continue
+            zip_ref.extract(member, extracted_folder)
+    return [os.path.join(root, file)
+            for root, _, files in os.walk(extracted_folder)
+            for file in files]
