@@ -465,6 +465,7 @@ footer {
     color: #fff;
     font-size: 10px;
     z-index: 1001; /* Make sure it's above other elements if necessary */
+    line-height: 0.75;
   }
 
 /* Adjust font sizes for screens between 1600px and 1024px */
