@@ -7,7 +7,7 @@ body {
     margin: 0;
     padding: 0;
     background-color: rgba(58, 165, 154);
-    color: #fffdf9;
+    color:  #232823;
     font-family: "Avenir Next LT Pro", sans-serif;
     display: flex;
     flex-direction: column;
@@ -51,7 +51,6 @@ body {
 .use-case-container {
     height: 90%;
     width: 90%;
-    text-shadow: 1px 1px 2px black;
     font-size: 15px;
 }
 
@@ -89,7 +88,6 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    text-shadow: 4px 1px 8px rgba(0,0,0,0.5);
 }
 
 .left-section h1 {
@@ -97,6 +95,7 @@ body {
     font-size: 94px;
     margin-bottom: 0px;
     width: 90%;
+    line-height: 0.9;
 }
 
 .file-info-table {
@@ -122,7 +121,6 @@ body {
     color: #888888;
     background-color: #f2f2f2a9; /* Optional: add a background color for headers */
     text-align: left;
-    text-shadow: none;
 }
   
 /* ###########################################
@@ -131,7 +129,6 @@ body {
 .right-section {
     flex: 1;
     background-color: rgba(58, 165, 83, 0.245);
-    text-shadow: 4px 1px 4px rgba(0,0,0,0.5);
     padding: 25px;
     border-radius: 15px;
     display: flex;
@@ -171,7 +168,6 @@ form button {
     color: rgb(252, 177, 177);
     font-weight: bold;
     margin: 5px 0;
-    text-shadow: 1px 1px 2px black;
 }
 
 /* ###########################################
@@ -183,14 +179,13 @@ input[type="file"] {
     border: 1px solid #ebebeb;
     border-radius: 5px;
     background-color: transparent;
-    color: #ebebeb;
-    text-shadow: 2px 1px 3px rgba(0,0,0,0.75);
+    color:  #232823;
     width: 100%;
 }
 
 input[type="file"]::file-selector-button {
     background-color: #ebebeb;
-    color: #516d60;
+    color: #232823;
     border: none;
     padding: 8px;
     border-radius: 5px;
@@ -282,7 +277,7 @@ button:hover,
 
 .nav-right a {
     text-decoration: none;
-    color: black;
+    color: #232823;
     display: inline-flex;  /* Make the anchor a flex container */
     align-items: center;   /* Center content vertically */
 }
@@ -306,7 +301,6 @@ button:hover,
     margin-top: 10px;
     text-decoration: none;
     display: inline-block;
-    text-shadow: none;
 }
 
 .download-btn:hover {
@@ -380,7 +374,6 @@ button:hover,
     right: 0;
     background-color: #f9f9f9;
     min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
 }
 
@@ -404,7 +397,6 @@ button:hover,
 ############################################ */
 .password-requirements-box {
     text-align: start;
-    text-shadow: 1px 1px 2px black;
 }
 
 #password-requirements {
@@ -413,7 +405,7 @@ button:hover,
 }
 
 #password-requirements li {
-    color: #ebebeb;
+    color:  #232823;
 }
 
 #password-requirements li.valid {
@@ -476,6 +468,7 @@ footer {
 
     .left-section h1 {
         font-size: 72px; /* Reduce the size of the main heading */
+        color: #232823;
     }
 
     .file-info-table th,
@@ -534,7 +527,7 @@ footer {
 
     /* Show a message suggesting to visit the site on a computer */
     .left-section::after {
-        content: "Visit site on a computer for full use!";
+        content: "Visit site on a larger screen for full use!";
         display: block;
         margin-top: 20px;
         font-size: 18px;
