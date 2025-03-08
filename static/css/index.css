@@ -535,7 +535,7 @@ footer {
 
     /* Show a message suggesting to visit the site on a computer */
     .left-section::after {
-        content: "Visit site on a larger screen for full use!";
+        content: "Visit site on a computer for full use!";
         display: block;
         margin-top: 20px;
         font-size: 18px;
