@@ -70,7 +70,7 @@ def index():
         # Generate a unique PDF file name if the preset is used.
         pdf_name_input = request.form.get("pdf_name", "").strip()
         if not pdf_name_input or pdf_name_input == "UnifyDoc.pdf":
-            pdf_name = f"UnifyDoc-{secrets.token_hex(4)}.pdf"
+            pdf_name = f"UnifyDoc-{secrets.token_hex(8)}.pdf"
         else:
             pdf_name = secure_filename(pdf_name_input)
 
