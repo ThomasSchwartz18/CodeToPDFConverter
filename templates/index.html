@@ -72,6 +72,25 @@
     }
   </script>
   <!-- Removed PayPal subscription scripts since we're no longer using them -->
+  <!-- Inline script for expandable list items -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const expandButtons = document.querySelectorAll('.expand-btn');
+      expandButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          // The expandable text is the next sibling element
+          const expandableText = btn.nextElementSibling;
+          if (expandableText.style.display === 'inline' || expandableText.style.display === 'inline-block') {
+            expandableText.style.display = 'none';
+            btn.classList.remove('expanded');
+          } else {
+            expandableText.style.display = 'inline-block';
+            btn.classList.add('expanded');
+          }
+        });
+      });
+    });
+  </script>
 </head>
 <body>
   <!-- Navigation Bar -->
@@ -212,32 +231,44 @@
       <ol>
         <li>
           <b>Coders:</b> Debug smarter with AI
-          <ul>
-            <li><b>The Problem:</b> You've got a project folder - Python scripts, C files, HTML, Images - and you need an AI chat to debug or suggest improvements. Copy-pasting snippets is a mess; AI needs the full picture.</li>
-            <li><b>The Fix:</b> Zip your folder, upload it to UnifyDoc, and get one PDF with everything - code, notes, pictures. Feed it to your AI and watch it spot bugs or optimizations in seconds.</li>
-            <li><b>Power Move:</b> I built this for myself - turned a 30-file Python project into one PDF, and AI found a loop error I'd missed for days.</li>
-          </ul>
+          <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
+          <span class="expandable">
+            <ul>
+              <li><b>The Problem:</b> You've got a project folder - Python scripts, C files, HTML, Images - and you need an AI chat to debug or suggest improvements. Copy-pasting snippets is a mess; AI needs the full picture.</li>
+              <li><b>The Fix:</b> Zip your folder, upload it to UnifyDoc, and get one PDF with everything - code, notes, pictures. Feed it to your AI and watch it spot bugs or optimizations in seconds.</li>
+              <li><b>Power Move:</b> I built this for myself - turned a 30-file Python project into one PDF, and AI found a loop error I'd missed for days.</li>
+            </ul>
+          </span>
         </li>
         <li>
           <b>Teachers:</b> Streamlined Lesson Plans
-          <ul>
-            <li><b>The Problem:</b> Lesson plans are a jumble - Word docs with notes, PDFs of worksheets, Images. Combining them for class or admin is a headache.</li>
-            <li><b>The Fix:</b> Upload your files - or a ZIP folder - and UnifyDoc merges them into one PDF. Share it with students or file it with the principal, no fuss. To keep formatting from Word Docs, print them as individual PDFs before adding them to a ZIP folder.</li>
-          </ul>
+          <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
+          <span class="expandable">
+            <ul>
+              <li><b>The Problem:</b> Lesson plans are a jumble - Word docs with notes, PDFs of worksheets, Images. Combining them for class or admin is a headache.</li>
+              <li><b>The Fix:</b> Upload your files - or a ZIP folder - and UnifyDoc merges them into one PDF. Share it with students or file it with the principal, no fuss. To keep formatting from Word Docs, print them as individual PDFs before adding them to a ZIP folder.</li>
+            </ul>
+          </span>
         </li>
         <li>
           <b>Students:</b> Ace Assignments
-          <ul>
-            <li><b>The Problem:</b> Your project is due - research in .docx, charts in JPEG, code in .py. Professors want one file, not a ZIP bomb.</li>
-            <li><b>The Fix:</b> Drop your files into UnifyDoc, solo or zipped, and get a single PDF. Submit it clean, look professional, and get those extra points.</li>
-          </ul>
+          <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
+          <span class="expandable">
+            <ul>
+              <li><b>The Problem:</b> Your project is due - research in .docx, charts in JPEG, code in .py. Professors want one file, not a ZIP bomb.</li>
+              <li><b>The Fix:</b> Drop your files into UnifyDoc, solo or zipped, and get a single PDF. Submit it clean, look professional, and get those extra points.</li>
+            </ul>
+          </span>
         </li>
         <li>
           <b>Anyone:</b> Simplify Chaos
-          <ul>
-            <li><b>The Problem:</b> Receipts (JPEG), notes (.txt), contracts (.docx) - life is a file soup, and you need it organized.</li>
-            <li><b>The Fix:</b> Upload any text file or image, or a ZIP of it all, and UnifyDoc hands you one PDF. Store it, share it, and you're done.</li>
-          </ul>
+          <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
+          <span class="expandable">
+            <ul>
+              <li><b>The Problem:</b> Receipts (JPEG), notes (.txt), contracts (.docx) - life is a file soup, and you need it organized.</li>
+              <li><b>The Fix:</b> Upload any text file or image, or a ZIP of it all, and UnifyDoc hands you one PDF. Store it, share it, and you're done.</li>
+            </ul>
+          </span>
         </li>
       </ol>
       <p>
@@ -259,7 +290,7 @@
   </div>  
 
   <footer>
-    <p>Last updated: March 8, 2025</p>
+    <p>Last updated: March 9, 2025</p>
     <p>&copy; 2025 N&T Development</p>
   </footer>
 </body>
