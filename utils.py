@@ -146,6 +146,8 @@ def process_zip(zip_path):
                 print(f"Skipped unsafe file path: {member.filename}")
                 continue
             zip_ref.extract(member, extracted_folder)
-    return [os.path.join(root, file)
-            for root, _, files in os.walk(extracted_folder)
-            for file in files]
+    return sorted([
+        os.path.join(root, file)
+        for root, _, files in os.walk(extracted_folder)
+        for file in files
+    ])
