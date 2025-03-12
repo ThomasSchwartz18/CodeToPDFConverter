@@ -29,6 +29,62 @@
     })(window, document, "clarity", "script", "ql2f7kojj1");
   </script>
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.innerWidth > 1024) { // Only show on computer resolutions
+            let isBookmarked = false;
+
+            // Attempt to detect if page is bookmarked (limited due to browser restrictions)
+            try {
+                isBookmarked = window.location.hash.includes("bookmarked");
+            } catch (e) {}
+
+            if (!isBookmarked) {
+                // Create the alert notification
+                let notification = document.createElement("div");
+                notification.className = "alert-notification";
+                notification.innerHTML = "⭐ Consider bookmarking for future use!";
+
+                // Style the notification container (ensure it's at the top)
+                notification.style.position = "fixed";
+                notification.style.top = "10px"; // Slight padding from top
+                notification.style.left = "50%";
+                notification.style.transform = "translateX(-50%)";
+                notification.style.zIndex = "2000";
+                notification.style.backgroundColor = "#ff914d"; 
+                notification.style.color = "#fff";
+                notification.style.padding = "6px 12px";
+                notification.style.borderRadius = "5px";
+                notification.style.boxShadow = "0px 4px 6px rgba(0, 0, 0, 0.1)";
+                notification.style.fontSize = "14px";
+                notification.style.fontWeight = "bold";
+                notification.style.textAlign = "center";
+                notification.style.opacity = "0";  // Initially hidden
+                notification.style.whiteSpace = "nowrap"; // Prevents text from wrapping
+                notification.style.transition = "opacity 0.5s ease-in-out, top 0.5s ease-in-out";
+                notification.style.height = "20px";
+
+                // Append the notification to the body
+                document.body.appendChild(notification);
+
+                // Fade in effect after 1 second
+                setTimeout(() => {
+                    notification.style.opacity = "1";
+                }, 1000);
+
+                // Auto-hide after 8 seconds
+                setTimeout(function() {
+                    notification.style.opacity = "0";  // Fade out
+                    notification.style.top = "0px"; // Slide up before disappearing
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 500);
+                }, 8000);
+            }
+        }
+    });
+  </script>
+
   <link rel="stylesheet" href="../static/css/index.css">
   <script>
     function showSection(sectionId) {
@@ -286,11 +342,23 @@
         <li>When uploading Word documents, please note that only textual content will be extracted. For full formatting fidelity, consider converting your document to PDF prior to uploading.</li>
         <li>Ensure image-based or complex layout documents are uploaded as PDFs to maintain visual and structural accuracy within the system.</li>
       </ul>
+      <h2>Watch a tutorial on UnifyDoc</h2>
+      <div class="video-container">
+          <iframe 
+              width="560" 
+              height="315" 
+              src="https://www.youtube.com/embed/pnT9v20qyQ0" 
+              title="How to convert multiple files into a single PDF" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+          </iframe>
+      </div>
     </div>
   </div>  
 
   <footer>
-    <p>Last updated: March 9, 2025</p>
+    <p>Last updated: March 11, 2025</p>
     <p>&copy; 2025 N&T Development</p>
   </footer>
 </body>

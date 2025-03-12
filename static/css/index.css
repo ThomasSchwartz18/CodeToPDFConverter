@@ -482,7 +482,24 @@ footer {
     font-size: 10px;
     z-index: 1001; /* Make sure it's above other elements if necessary */
     line-height: 0.75;
-  }
+}
+
+.video-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+
+.video-container iframe {
+    max-width: 100%;
+    width: 560px;
+    height: 315px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
 
 /* Adjust font sizes for screens between 1600px and 1024px */
 @media screen and (max-width: 1600px) and (min-width: 1024px) {
