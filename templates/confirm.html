@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirm File Selection</title>
+  <link rel="stylesheet" href="../static/css/index.css">
+  <style>
+    .confirmation-container {
+        width: 100%;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+    /* Inline styles for the scrollable area and tree view */
+    #file-tree-container {
+      max-height: 400px;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 20px;
+      align-items: start;
+      text-align: left;
+      width: 100vh;
+      margin: auto;
+    }
+    /* Ensure all folder labels and file items are aligned flush left */
+    .folder, .file-item, .folder-content {
+      margin: 0;
+    }
+    .folder > label {
+      font-weight: bold;
+    }
+    .toggle-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      margin-left: 0;
+      padding: 5px;
+    }
+    /* Style for the button container to have buttons next to each other */
+    .button-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+    <div class="confirmation-container">
+        <h2>Confirm Files for PDF Conversion</h2>
+        <p>Please uncheck any folders or individual files you do NOT want to include in the PDF.</p>
+        <form action="/generate" method="post">
+          <div id="file-tree-container">
+            {# Render files in the root (if any) #}
+            {% for file in file_tree.files %}
+            <div class="file-item">
+              <label>
+                <input type="checkbox" name="files" value="{{ file.full_path }}" checked>
+                {{ file.name }}
+              </label>
+            </div>
+            {% endfor %}
+            {# Render folders recursively using a macro #}
+            {% macro render_folder(folder) %}
+            <div class="folder">
+              <label>
+                <input type="checkbox" class="folder-checkbox" onclick="toggleFolder(this)" checked>
+                {{ folder.name }}
+                <button type="button" class="toggle-button" onclick="toggleVisibility(this)">&#9660;</button>
+              </label>
+              <div class="folder-content">
+                {% for file in folder.files %}
+                <div class="file-item" style="margin-left: {{ file.indent }}px;">
+                  <label>
+                    <input type="checkbox" name="files" value="{{ file.full_path }}" checked>
+                    {{ file.name }}
+                  </label>
+                </div>                
+                {% endfor %}
+                {% for subfolder in folder.folders %}
+                  {{ render_folder(subfolder) }}
+                {% endfor %}
+              </div>
+            </div>
+            {% endmacro %}
+            {% for folder in file_tree.folders %}
+              {{ render_folder(folder) }}
+            {% endfor %}
+          </div>
+          <!-- <label for="pdf_name">Download PDF Name:</label>
+          <input type="text" id="pdf_name" name="pdf_name" value="UnifyDoc.pdf"> -->
+          <br><br>
+          <div class="button-container">
+            <button type="submit">Generate PDF</button>
+            <button type="button" onclick="exitConfirmation()">Exit Confirmation</button>
+          </div>
+        </form>
+    </div>
+  <script>
+    function toggleVisibility(button) {
+      var content = button.parentElement.nextElementSibling;
+      if (content.style.display === "none") {
+        content.style.display = "block";
+        button.innerHTML = "&#9660;"; // down arrow
+      } else {
+        content.style.display = "none";
+        button.innerHTML = "&#9654;"; // right arrow
+      }
+    }
+    
+    function toggleFolder(checkbox) {
+      var folderDiv = checkbox.closest('.folder');
+      // Find all checkboxes within this folder (both in folder header and its contents)
+      var inputs = folderDiv.querySelectorAll('input[type="checkbox"]');
+      inputs.forEach(function(input) {
+        input.checked = checkbox.checked;
+      });
+    }
+    
+    function exitConfirmation() {
+      // If this confirmation page is loaded inside an iframe or embedded container in index.html,
+      // call parent's functions to hide the confirmation section and show the upload form.
+      if (parent && parent.document) {
+        // Assumes that the main page has an element with id "confirm-view-section" for confirmation
+        // and an element with id "form-section" for the upload form.
+        var confirmSection = parent.document.getElementById('confirm-view-section');
+        var formSection = parent.document.getElementById('form-section');
+        if (confirmSection && formSection) {
+          confirmSection.style.display = 'none';
+          formSection.style.display = 'flex';
+        } else {
+          // Fallback: if not found, navigate back to the main page.
+          parent.location.href = "/";
+        }
+      } else {
+        // Fallback in case parent is not available.
+        window.location.href = "/";
+      }
+    }
+  </script>
+</body>
+</html>
