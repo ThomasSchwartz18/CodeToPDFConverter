@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, send_file, flash, session
 from werkzeug.exceptions import RequestEntityTooLarge
-import os, secrets, shutil
+import os, secrets, shutil, json
 from werkzeug.utils import secure_filename
 from config import UPLOAD_DIR
 from utils import generate_code_pdf, process_zip
@@ -33,6 +33,7 @@ def index():
                     shutil.rmtree(file_path)
             except Exception as e:
                 print(f'Failed to delete {file_path}. Reason: {e}')
+                
         uploaded_files = request.files.getlist("files")
         file_paths = []
         for file in uploaded_files:
@@ -43,8 +44,15 @@ def index():
                 file_paths.extend(process_zip(file_path))
             else:
                 file_paths.append(file_path)
-        # Save the file paths and PDF settings in session for confirmation.
-        session['file_paths'] = file_paths
+                
+        # Instead of storing the full file_paths list in the session,
+        # generate a token and write the file_paths to a temporary JSON file.
+        upload_token = secrets.token_hex(8)
+        json_file_path = os.path.join(UPLOAD_DIR, f"{upload_token}.json")
+        with open(json_file_path, "w") as f:
+            json.dump(file_paths, f)
+        session['upload_token'] = upload_token
+
         settings = {}
         try:
             settings['margin'] = int(request.form.get("margin", 10))
@@ -55,7 +63,7 @@ def index():
         settings['orientation'] = request.form.get("orientation", "portrait")
         settings['page_size'] = request.form.get("page_size", "letter")
         settings['show_file_info'] = True if request.form.get("show_file_info") else False
-        # Save the PDF name from initial settings form.
+        # Save the PDF name from the initial settings form.
         settings['pdf_name'] = request.form.get("pdf_name", "UnifyDoc.pdf")
         session['settings'] = settings
 
@@ -140,6 +148,10 @@ def index():
                 page_size=(page_width, page_height),
                 show_file_info=settings.get("show_file_info", False)
             )
+            # Cleanup temporary file and token after PDF generation.
+            session.pop('upload_token', None)
+            if os.path.exists(json_file_path):
+                os.remove(json_file_path)
             return render_template("index.html",
                                    pdf_url=f"/download?pdf_name={pdf_name}",
                                    view_url=f"/view?pdf_name={pdf_name}",
@@ -151,7 +163,7 @@ def index():
 
 @app.route("/generate", methods=["POST"])
 def generate_pdf():
-    # Retrieve the list of file paths selected by the user.
+    # Retrieve the list of file paths selected by the user from the form.
     selected_files = request.form.getlist("files")
     settings = session.get('settings', {})
 
@@ -187,6 +199,12 @@ def generate_pdf():
         page_size=(page_width, page_height),
         show_file_info=settings.get("show_file_info", False)
     )
+    # Cleanup the temporary JSON file after generation.
+    upload_token = session.pop('upload_token', None)
+    if upload_token:
+        json_file_path = os.path.join(UPLOAD_DIR, f"{upload_token}.json")
+        if os.path.exists(json_file_path):
+            os.remove(json_file_path)
     return render_template("index.html",
                            pdf_url=f"/download?pdf_name={pdf_name}",
                            view_url=f"/view?pdf_name={pdf_name}",
