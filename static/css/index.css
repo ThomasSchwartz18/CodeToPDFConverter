@@ -829,10 +829,13 @@ footer p {
 @media screen and (max-width: 768px) {
     .nav {
         padding: 2px 10px;
-        font-size: small;
+        font-size: xx-small;
     }
     .nav .nav-center {
         font-size: x-small;
+    }
+    .nav .nav-right img {
+        width: 12px;
     }
     .nav.scrolled {
         width: 90%; /* use more horizontal space on small screens */
@@ -842,9 +845,15 @@ footer p {
     }
     .upload-lower {
         flex-direction: column; /* stack the lower sections vertically */
-        width: 100%;
+        width: 90%;
         justify-content: center;
         align-items: center;
+    }
+    .file-input {
+        width: 80%;
+    }
+    .pdf-secttings-container {
+        width: 80%;
     }
     .upload-sub-section {
         width: 100%; /* full width sections for easier reading */
@@ -861,6 +870,9 @@ footer p {
     }
     #form-section {
         padding: 0 10px; /* reduce side padding */
+    }
+    .best-practices-section .content li {
+        width: 80%;
     }
     footer {
         padding: 15px;
