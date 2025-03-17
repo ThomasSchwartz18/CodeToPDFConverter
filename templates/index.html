@@ -43,15 +43,15 @@
                 // Create the alert notification
                 let notification = document.createElement("div");
                 notification.className = "alert-notification";
-                notification.innerHTML = "⭐ Consider bookmarking for future use!";
+                notification.innerHTML = "⭐ bookmark for future use!";
 
                 // Style the notification container (ensure it's at the top)
                 notification.style.position = "fixed";
-                notification.style.top = "10px"; // Slight padding from top
+                notification.style.top = "60px"; // Slight padding from top
                 notification.style.left = "50%";
                 notification.style.transform = "translateX(-50%)";
                 notification.style.zIndex = "2000";
-                notification.style.backgroundColor = "#ff914d"; 
+                notification.style.backgroundColor = "#014d4ebf"; 
                 notification.style.color = "#fff";
                 notification.style.padding = "6px 12px";
                 notification.style.borderRadius = "5px";
@@ -150,16 +150,21 @@
 </head>
 <body>
   <!-- Navigation Bar -->
-  <nav class="navbar">
-    <div class="nav-left">
-      <!-- Direct Donate button (opens in a new tab) -->
-      <a href="https://www.paypal.com/donate/?hosted_button_id=AS22M4RMC5HXL" target="_blank" class="nav-button">Buy me a coffee :)</a>
-    </div>
-    <div class="nav-right">
-      <a href="https://thomasschwartz18.github.io/MotherSite/index.html" target="_blank">
-        Check out our other web tools
-        <img src="../static/images/exit_to_app_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png" alt="">
-      </a>
+  <nav class="navbar-container">
+    <div class="nav" id="nav">
+      <div class="nav-left">
+        <!-- Direct Donate button (opens in a new tab) -->
+        <a href="https://www.paypal.com/donate/?hosted_button_id=AS22M4RMC5HXL" target="_blank" class="nav-button">Buy me a coffee <span class="smiley">:)</span></a>
+      </div>
+      <div class="nav-center">
+        UnifyDoc
+      </div>
+      <div class="nav-right">
+        <a href="https://thomasschwartz18.github.io/MotherSite/index.html" target="_blank" class="nav-button">
+          Our other web tools
+          <img src="../static/images/exit_to_app_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.png" alt="">
+        </a>
+      </div>
     </div>
   </nav>
   <!-- Global Notification Container -->
@@ -172,198 +177,281 @@
       </div>
     {% endif %}
   {% endwith %}
-  <video autoplay muted loop playsinline class="background-video">
+  <!-- <video autoplay muted loop playsinline class="background-video">
     <source src="../static/images/background_video.mp4" type="video/mp4">
     Your browser does not support the video tag.
-  </video>
+  </video> -->
   <!-- Upload Section -->
-  <div id="upload-section" class="container" style="display: {% if section=='upload-section' %}flex{% else %}none{% endif %};">
-    <!-- Left Section: Intro and File Info Table -->
-    <div class="left-section">
-      <h1>Let's glide into the future together...</h1>
-      <h2>Combine text documents into PDF files for easy storage, sharing and debugging.</h2>
-      <table class="file-info-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Description</th>
-            <th>File Types</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Supported</td>
-            <td>Files that are processed and included in the PDF.</td>
-            <td>.py, .txt, .html, .js, .css, .java, .cpp, .c, .json, .md, .php, .sql, .doc, .docx, .pdf, .png, .jpg, .jpeg, .svg, .zip</td>
-          </tr>
-          <tr>
-            <td>Ignored</td>
-            <td>Files that are skipped as they are non-text or unsupported for user security.</td>
-            <td>.exe, .dll, .env</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Right Section: Upload Form and PDF Preview -->
-    <div class="right-section">
-      <!-- Form and Download Options Container -->
-      <div id="form-section">
-        <form action="/" method="post" enctype="multipart/form-data">
-          <h2>
-            Upload text document or ZIP Folder
-            <br><span>200 MB upload limit</span>
-          </h2>
-          <input type="file" name="files" class="file-input" multiple required>
-          <fieldset>
-            <legend>PDF Settings</legend>
-            <div class="form-row">
-              <label for="show_file_info">Display file name and file path:</label>
-              <input type="checkbox" id="show_file_info" name="show_file_info" checked>
-            </div>
-            <div class="form-row">
-              <label for="pdf_name">Download PDF Name:</label>
-              <input type="text" id="pdf_name" name="pdf_name" value="UnifyDoc.pdf">
-            </div>
-            <div class="form-row">
-              <label for="margin">Margin (points):</label>
-              <input type="number" id="margin" name="margin" value="10" min="0">
-            </div>
-            <div class="form-row">
-              <label for="header_note">Header Note:</label>
-              <input type="text" id="header_note" name="header_note" placeholder="Optional header text">
-            </div>
-            <div class="form-row">
-              <label for="footer_note">Footer Note:</label>
-              <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text">
-            </div>
-            <div class="form-row">
-              <label>Orientation:</label>
-              <div class="orientation-selection">
-                <input type="radio" id="portrait" name="orientation" value="portrait" checked>
-                <label for="portrait">Portrait</label>
-                <input type="radio" id="landscape" name="orientation" value="landscape">
-                <label for="landscape">Landscape</label>
-              </div>
-            </div>
-            <div class="form-row">
-              <label for="page_size">Page Size:</label>
-              <select id="page_size" name="page_size">
-                <option value="letter" selected>Letter (612 x 792)</option>
-                <option value="a4">A4 (595 x 842)</option>
-                <option value="legal">Legal (612 x 1008)</option>
-              </select>
-            </div>
-            <div class="form-row">
-              <label for="skip_confirmation">Skip file confirmation (use all files in upload):</label>
-              <input type="checkbox" id="skip_confirmation" name="skip_confirmation">
-            </div>            
-          </fieldset>          
-          <button type="submit">Convert to PDF</button>
-        </form>
-        {% if pdf_url %}
-        <div class="download-section">
-          <h3>View or Download your PDF:</h3>
-          <!-- Use the new function to enter view mode -->
-          <button onclick="enterView()">View</button>
-          <a href="{{ pdf_url }}" class="pdf-button download-btn" download>Download</a>
+  <div id="upload-section" class="upload-container" style="display: {% if section=='upload-section' %}flex{% else %}none{% endif %};">
+    <div class="upload">
+      <h1 id="animated-heading">Let's convert smarter<br>together<span class="dots">...</span></h1>
+      <div class="flowchart-container">
+        <div class="flowchart-box box-1">Zipped Code Projects</div>
+        <div class="flowchart-arrow box-1">/</div>
+        <div class="flowchart-box box-2">Text Documents</div>
+        <div class="flowchart-arrow box-2">/</div>
+        <div class="flowchart-box box-3">Images</div>
+        <div class="flowchart-arrow box-3">/</div>
+        <div class="flowchart-box box-4">Multiple PDFs</div>
+        <div class="flowchart-arrow box-4">/</div>
+        <div class="flowchart-box box-5">More</div>
+        <div class="flowchart-arrow box-5">&#8594;</div>
+        <div class="flowchart-box final box-6">Combined PDF</div>
+        <div class="flowchart-description box-6">
+          <h2>Streamlining storage, enhancing sharing, and simplifying debugging.</h2>
         </div>
-        {% endif %}
       </div>
 
-      <!-- PDF Preview Container (Initially Hidden) -->
-      <div id="pdf-view-section" style="display: none;">
-        <div class="view-header">
-          <button onclick="exitView()">Exit View</button>
-          <a href="{{ pdf_url }}" class="pdf-button download-btn" download>Download</a>
-        </div>
-        <div id="pdf-view-container">
-          <iframe src="{{ view_url }}"></iframe>
+      <div class="upload-lower">
+        <!-- Left Section: Intro and File Info Table -->
+        <div class="upload-sub-section left-section">
+          <div class="file-guidelines">
+            <div class="card supported">
+              <div class="card-icon">✔️</div>
+              <h3>Supported Files</h3>
+              <p>Files processed and included in your PDF.</p>
+              <p class="extensions">
+                <span class="file-type">.py</span>
+                <span class="file-type">.txt</span>
+                <span class="file-type">.html</span>
+                <span class="file-type">.js</span>
+                <span class="file-type">.css</span>
+                <span class="file-type">.java</span>
+                <span class="file-type">.cpp</span>
+                <span class="file-type">.c</span>
+                <span class="file-type">.json</span>
+                <span class="file-type">.md</span>
+                <span class="file-type">.php</span>
+                <span class="file-type">.sql</span>
+                <span class="file-type">.doc</span>
+                <span class="file-type">.docx</span>
+                <span class="file-type">.pdf</span>
+                <span class="file-type">.png</span>
+                <span class="file-type">.jpg</span>
+                <span class="file-type">.jpeg</span>
+                <span class="file-type">.svg</span>
+                <span class="file-type">.zip</span>
+              </p>
+            </div>
+            <div class="card ignored">
+              <div class="card-icon">⚠️</div>
+              <h3>Ignored Files</h3>
+              <p>Files skipped for security reasons.</p>
+              <p class="extensions">
+                <span class="file-type">.exe</span>
+                <span class="file-type">.dll</span>
+                <span class="file-type">.env</span>
+              </p>
+            </div>
+          </div>
+        </div>        
+    
+        <!-- Right Section: Upload Form and PDF Preview -->
+        <div class="upload-sub-section right-section" id="upload-sec">
+          <!-- Form and Download Options Container -->
+          <div id="form-section">
+            <form action="/" method="post" enctype="multipart/form-data">
+              <h2>
+                Upload text document or ZIP Folder
+                <br><span>(200 MB upload limit)</span>
+              </h2>
+              <input type="file" name="files" class="file-input" multiple required>
+              <fieldset class="pdf-secttings-container">
+                <legend>PDF Settings</legend>
+                <div class="form-row">
+                  <label for="show_file_info">Display file name and file path:</label>
+                  <input type="checkbox" id="show_file_info" name="show_file_info" checked>
+                </div>
+                <div class="form-row">
+                  <label for="pdf_name">Download PDF Name:</label>
+                  <input type="text" id="pdf_name" name="pdf_name" value="UnifyDoc.pdf">
+                </div>
+                <div class="form-row">
+                  <label for="margin">Margin (points):</label>
+                  <input type="number" id="margin" name="margin" value="10" min="0">
+                </div>
+                <div class="form-row">
+                  <label for="header_note">Header Note:</label>
+                  <input type="text" id="header_note" name="header_note" placeholder="Optional header text">
+                </div>
+                <div class="form-row">
+                  <label for="footer_note">Footer Note:</label>
+                  <input type="text" id="footer_note" name="footer_note" placeholder="Optional footer text">
+                </div>
+                <div class="form-row">
+                  <label>Orientation:</label>
+                  <div class="orientation-selection">
+                    <input type="radio" id="portrait" name="orientation" value="portrait" checked>
+                    <label for="portrait">Portrait</label>
+                    <input type="radio" id="landscape" name="orientation" value="landscape">
+                    <label for="landscape">Landscape</label>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <label for="page_size">Page Size:</label>
+                  <select id="page_size" name="page_size">
+                    <option value="letter" selected>Letter (612 x 792)</option>
+                    <option value="a4">A4 (595 x 842)</option>
+                    <option value="legal">Legal (612 x 1008)</option>
+                  </select>
+                </div>
+                <div class="form-row full-span">
+                  <label for="skip_confirmation">Skip file confirmation (uncheck to remove files/ folders in upload):</label>
+                  <input type="checkbox" id="skip_confirmation" name="skip_confirmation" checked>
+                </div>         
+              </fieldset>          
+              <button type="submit">Convert to PDF</button>
+            </form>
+            {% if pdf_url %}
+            <div class="download-section">
+              <h3>View or Download your PDF:</h3>
+              <!-- Use the new function to enter view mode -->
+              <button onclick="enterView()">View</button>
+              <a href="{{ pdf_url }}" class="download-btn" download>Download</a>
+            </div>
+            {% endif %}
+          </div>
+    
+          <!-- PDF Preview Container (Initially Hidden) -->
+          <div id="pdf-view-section" style="display: none;">
+            <div class="view-header">
+              <button onclick="exitView()" class="exit-view-btn">Exit View</button>
+              <a href="{{ pdf_url }}" class="download-btn" download>Download</a>
+            </div>
+            <div id="pdf-view-container">
+              <iframe src="{{ view_url }}"></iframe>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="use-case-section">
-    <h2>Use Cases</h2>
+    <h2>UnifyDoc: Transform Chaos into Clarity</h2>
+    <p class="tagline">From scattered files to an AI-ready, streamlined PDF – fast, free, and foolproof.</p>
     <div class="use-case-container">
-      <p>UnifyDoc isn't just another file converter - it's your shortcut to taming the chaos of mixed file types. Whether you're a coder, a teacher, a student, or just someone drowning in docs, here's how it transforms your workflow into one clean PDF, fast and free.</p>
       <ol>
         <li>
-          <b>Coders:</b> Debug smarter with AI
+          <b>Coders: Code in Chaos? Let AI Uncover Your Bugs!</b>
           <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
           <span class="expandable">
             <ul>
-              <li><b>The Problem:</b> You've got a project folder - Python scripts, C files, HTML, Images - and you need an AI chat to debug or suggest improvements. Copy-pasting snippets is a mess; AI needs the full picture.</li>
-              <li><b>The Fix:</b> Zip your folder, upload it to UnifyDoc, and get one PDF with everything - code, notes, pictures. Feed it to your AI and watch it spot bugs or optimizations in seconds.</li>
-              <li><b>Power Move:</b> I built this for myself - turned a 30-file Python project into one PDF, and AI found a loop error I'd missed for days.</li>
+              <li><b>The Problem:</b> Juggling Python scripts, HTML, C files, and images? Fragmented copy-pasting leaves AI without context.</li>
+              <li><b>The Fix:</b> Zip your entire project, upload to UnifyDoc, and receive a comprehensive PDF—so AI sees every detail to debug effectively.</li>
+              <li><b>Power Move:</b> I converted a 30-file Python project into one PDF, and AI uncovered a loop error that had been hidden for days.</li>
             </ul>
           </span>
         </li>
         <li>
-          <b>Teachers:</b> Streamlined Lesson Plans
+          <b>Teachers: Overwhelmed by Lesson Plan Mayhem?</b>
           <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
           <span class="expandable">
             <ul>
-              <li><b>The Problem:</b> Lesson plans are a jumble - Word docs with notes, PDFs of worksheets, Images. Combining them for class or admin is a headache.</li>
-              <li><b>The Fix:</b> Upload your files - or a ZIP folder - and UnifyDoc merges them into one PDF. Share it with students or file it with the principal, no fuss. To keep formatting from Word Docs, print them as individual PDFs before adding them to a ZIP folder.</li>
+              <li><b>The Problem:</b> Lesson plans from Word docs, PDFs, and images often end up disjointed and hard to manage.</li>
+              <li><b>The Fix:</b> Upload your files or a ZIP folder, and UnifyDoc merges them into one unified PDF. (Tip: Convert Word docs to individual PDFs first.)</li>
             </ul>
           </span>
         </li>
         <li>
-          <b>Students:</b> Ace Assignments
+          <b>Students: Assignment Chaos? Ace It with a Single PDF!</b>
           <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
           <span class="expandable">
             <ul>
-              <li><b>The Problem:</b> Your project is due - research in .docx, charts in JPEG, code in .py. Professors want one file, not a ZIP bomb.</li>
-              <li><b>The Fix:</b> Drop your files into UnifyDoc, solo or zipped, and get a single PDF. Submit it clean, look professional, and get those extra points.</li>
+              <li><b>The Problem:</b> Research in .docx, charts in JPEG, and code in .py create a submission nightmare.</li>
+              <li><b>The Fix:</b> Upload your assorted files, and let UnifyDoc generate one clean, professional PDF—ensuring you stand out.</li>
             </ul>
           </span>
         </li>
         <li>
-          <b>Anyone:</b> Simplify Chaos
+          <b>Everyone: Turn File Soup into a Masterpiece</b>
           <img src="/static/images/expand.png" class="expand-btn" alt="Expand" />
           <span class="expandable">
             <ul>
-              <li><b>The Problem:</b> Receipts (JPEG), notes (.txt), contracts (.docx) - life is a file soup, and you need it organized.</li>
-              <li><b>The Fix:</b> Upload any text file or image, or a ZIP of it all, and UnifyDoc hands you one PDF. Store it, share it, and you're done.</li>
+              <li><b>The Problem:</b> Receipts, notes, and contracts create a chaotic file stew.</li>
+              <li><b>The Fix:</b> Upload any file or ZIP it up, and UnifyDoc delivers one streamlined PDF ready to store, share, and shine.</li>
             </ul>
           </span>
         </li>
       </ol>
       <p>
         <b>Why It Works</b><br>
-        UnifyDoc handles <i>any</i> text files and images, solo or zipped, and spits out a single sleek PDF. No software installs, no bloat - just results. Built by a student for real people. It's free, fast, and fixes what others miss.
+        UnifyDoc converts any text or image files—solo or zipped—into one sleek, AI-ready PDF. No installs, no bloat—just pure results. Built by a student for real people.
       </p>
-    </div>
-  </div>
+      <div class="button-container">
+        <a href="#upload-sec" class="pdf-button">Try and Convert a PDF</a>
+      </div>
+  </div>  
   
-  <div class="use-case-section">
-    <h2>Best Practices</h2>
-    <div class="use-case-container">
-      <ul>
-        <li>For optimal document conversion quality, upload documents in PDF format. Text content is extracted from Word documents, but formatting, images, and styling are not preserved.</li>
-        <li>When uploading Word documents, please note that only textual content will be extracted. For full formatting fidelity, consider converting your document to PDF prior to uploading.</li>
-        <li>Ensure image-based or complex layout documents are uploaded as PDFs to maintain visual and structural accuracy within the system.</li>
-      </ul>
-      <h2>Watch a tutorial on UnifyDoc</h2>
-      <div class="video-container">
-          <iframe 
-              width="560" 
-              height="315" 
+  <section class="best-practices-section">
+    <div class="container">
+      <header class="header">
+        <h2>Best Practices</h2>
+        <p>Keep these tips in mind when uploading your documents for optimal conversion quality.</p>
+      </header>
+      <div class="content">
+        <div class="tips">
+          <ul>
+            <li>Upload documents as PDFs to ensure text, images, and formatting remain intact.</li>
+            <li>When using Word files, note that only textual content is extracted.</li>
+            <li>For image-based or complex layouts, PDFs maintain visual accuracy.</li>
+          </ul>
+        </div>
+        <div class="video">
+          <h3>Watch Our UnifyDoc Tutorial</h3>
+          <div class="video-wrapper">
+            <iframe 
               src="https://www.youtube.com/embed/pnT9v20qyQ0" 
               title="How to convert multiple files into a single PDF" 
-              frameborder="0" 
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
               allowfullscreen>
-          </iframe>
+            </iframe>
+          </div>
+        </div>
       </div>
     </div>
-  </div>  
+  </section>  
 
   <footer>
-    <p>Last updated: March 13, 2025</p>
+    <p>Last updated: March 16, 2025</p>
     <p>&copy; 2025 N&T Development</p>
   </footer>
+  <script>
+    // Dynamic Styling for NAV on scroll
+    document.addEventListener("DOMContentLoaded", function() {
+      const nav = document.querySelector(".nav");
+
+      window.addEventListener("scroll", function() {
+        // Check if the page is scrolled down more than 50px
+        if (window.scrollY > 50) {
+          nav.classList.add("scrolled");
+        } else {
+          nav.classList.remove("scrolled");
+        }
+      });
+    });
+
+    // loop the "..." in the <h1><h1/>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Select the dots element within the heading
+      const dotsElement = document.querySelector("#animated-heading .dots");
+      let dotCount = 0;
+      // Update the dots every 500ms (adjust timing as needed)
+      setInterval(function() {
+        dotCount = (dotCount + 1) % 4; // cycles 0, 1, 2, 3
+        dotsElement.textContent = ".".repeat(dotCount);
+      }, 400);
+    });
+
+    // for opening Use case List items
+    document.querySelectorAll('.use-case-container li').forEach(li => {
+      li.addEventListener('click', function(e) {
+        // Prevent double toggling if clicking on interactive elements (if any)
+        if (e.target.tagName.toLowerCase() !== 'a' && e.target.tagName.toLowerCase() !== 'button') {
+          this.classList.toggle('active');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
