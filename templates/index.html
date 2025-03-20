@@ -185,6 +185,7 @@
   <div id="upload-section" class="upload-container" style="display: {% if section=='upload-section' %}flex{% else %}none{% endif %};">
     <div class="upload">
       <h1 id="animated-heading">Let's convert smarter<br>together<span class="dots">...</span></h1>
+      <div id="pdf-counter" class="conversion-counter">Converted PDFs: <span id="pdf-count">0</span></div>
       <div class="flowchart-container">
         <div class="flowchart-box box-1">Zipped Code Projects</div>
         <div class="flowchart-arrow box-1">+</div>
@@ -452,6 +453,38 @@
         }
       });
     });
+
+    // Add conversion count animation
+    document.addEventListener("DOMContentLoaded", function () {
+      const counterElement = document.getElementById('pdf-counter');
+      const pdfCountElement = document.getElementById('pdf-count');
+
+      fetch('/api/pdf_count')
+        .then(response => response.json())
+        .then(data => {
+          let targetCount = data.count;
+          let currentCount = 0;
+          let increment = Math.ceil(targetCount / 100);
+
+          counterElement.style.opacity = "1";
+
+          function updateCount() {
+            currentCount += increment;
+            if (currentCount >= targetCount) {
+              pdfCountElement.textContent = targetCount;
+            } else {
+              pdfCountElement.textContent = currentCount;
+              requestAnimationFrame(updateCount);
+            }
+          }
+
+          updateCount();
+        })
+        .catch(err => {
+          console.error("Error fetching PDF count:", err);
+        });
+    });
+
   </script>
 </body>
 </html>

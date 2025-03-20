@@ -61,9 +61,6 @@ body {
     height: 100%;
 }
 
-.nav-left a {
-}
-
 .nav-right a {
     display: flex;
     align-items: center;
@@ -157,6 +154,29 @@ body {
     display: inline-block;
     width: 1em;
     text-align: left;
+}
+
+/* PDF conversion counter */
+.conversion-counter {
+    font-family: 'Fira Sans', sans-serif;
+    color: #014d4e;
+    font-size: 1.8em;
+    margin-top: 0px;
+    margin-bottom: 5px;
+    opacity: 0;
+    font-weight: bold;
+    animation: fadeIn 2s forwards;
+}
+  
+#pdf-count {
+    font-family: 'Fira Code', 'Fira Sans';
+    font-weight: 400;
+    color: #84b6a3;
+    background: linear-gradient(90deg, #014d4e 45%, #84b6a3 50%, #014d4e 55%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: thinWaveAnimation 4s ease-in-out infinite;
 }
 
 /* ###########################################
@@ -893,6 +913,18 @@ footer p {
     }
     100% {
         background-position: 200% 50%;
+    }
+}
+
+@keyframes thinWaveAnimation {
+    0% {
+        background-position: 0% 50%;    /* Start from the left */
+    }
+    50% {
+        background-position: 100% 50%;  /* Move smoothly to the right */
+    }
+    100% {
+        background-position: 0% 50%;    /* Move back smoothly to the left */
     }
 }
 

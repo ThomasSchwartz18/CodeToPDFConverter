@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, send_file, flash, session
+from flask import Flask, render_template, request, send_file, flash, session, jsonify
 from werkzeug.exceptions import RequestEntityTooLarge
 import os, secrets, shutil, json
 from werkzeug.utils import secure_filename
 from config import UPLOAD_DIR
 from utils import generate_code_pdf, process_zip, build_file_tree
 from config import UPLOAD_DIR, TEXT_EXTENSIONS, IMAGE_EXTENSIONS
+from threading import Lock
+import json
 
 app = Flask(__name__)
 
@@ -14,6 +16,20 @@ app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 app.secret_key = secrets.token_hex(16)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Global counter
+counter_lock = Lock()
+
+def load_counter():
+    with open('counter.json', 'r') as f:
+        return json.load(f)["converted_pdf_count"]
+    
+def increment_counter():
+    with counter_lock:
+        count = load_counter() + 1
+        with open('counter.json', 'w') as f:
+            json.dump({"converted_pdf_count": count}, f)
+        return count
+
 @app.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(error):
     flash("File is too large. Maximum upload size is 200MB.")
@@ -22,6 +38,8 @@ def handle_file_too_large(error):
 @app.route("/", methods=["GET", "POST"])
 def index():
     section = request.args.get('section', 'upload-section')
+    current_count = load_counter()
+
     if request.method == "POST":
         # Clear the UPLOAD_DIR before processing new uploads
         for filename in os.listdir(UPLOAD_DIR):
@@ -94,6 +112,8 @@ def index():
                 page_size=(page_width, page_height),
                 show_file_info=settings.get("show_file_info", False)
             )
+            
+            current_count = increment_counter()
 
             session.pop('upload_token', None)
             if os.path.exists(json_file_path):
@@ -104,9 +124,27 @@ def index():
                                    view_url=f"/view?pdf_name={pdf_name}",
                                    section=section)
 
-        return render_template("confirm.html", file_tree=file_tree, settings=settings, section=section)
+        return render_template(
+            "confirm.html", 
+            file_tree=file_tree, 
+            settings=settings, 
+            section=section,
+            converted_pdf_count=current_count
+        )
 
-    return render_template("index.html", pdf_url=None, view_url=None, section=section)
+    return render_template(
+        "index.html", 
+        pdf_url=None, 
+        view_url=None, 
+        section=section,
+        converted_pdf_count=current_count
+    )
+
+# endpoint for counter
+@app.route("/api/pdf_count")
+def pdf_count():
+    current_count = load_counter()
+    return jsonify({"count": current_count})
 
 @app.route("/generate", methods=["POST"])
 def generate_pdf():
