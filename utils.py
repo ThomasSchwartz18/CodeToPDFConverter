@@ -151,3 +151,49 @@ def process_zip(zip_path):
         for root, _, files in os.walk(extracted_folder)
         for file in files
     ])
+
+def build_file_tree(file_paths, base_dir):
+    """
+    Efficiently builds a nested file tree structure with metadata for UI.
+
+    :param file_paths: List of file paths extracted from ZIP.
+    :param base_dir: Root directory for relative paths.
+    :return: Nested dictionary structure for confirm.html
+    """
+    tree = {"folders": [], "files": []}
+
+    for file in file_paths:
+        if file.startswith('.') or '/.' in file or '__MACOSX' in file:
+            continue
+        
+        file_extension = os.path.splitext(file)[1].lower()
+        if file_extension not in TEXT_EXTENSIONS and file_extension not in IMAGE_EXTENSIONS:
+            continue
+
+        rel_path = os.path.relpath(file, base_dir)
+        parts = rel_path.split(os.sep)
+        current = tree
+
+        for depth, part in enumerate(parts[:-1]):
+            folder_name = part + "/"
+            folder = next((f for f in current.get('folders', []) if f['name'] == folder_name), None)
+            if folder is None:
+                folder = {
+                    "name": folder_name,
+                    "folders": [],
+                    "files": [],
+                    "level": depth + 1,
+                    "indent": (depth + 1) * 20
+                }
+                current['folders'].append(folder)
+            current = folder
+
+        current_level = len(parts)
+        current["files"].append({
+            "name": parts[-1],
+            "full_path": file,
+            "level": current_level,
+            "indent": current_level * 20
+        })
+
+    return tree
