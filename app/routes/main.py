@@ -1,8 +1,9 @@
 import os
 import secrets
+import json
 from flask import (
     Blueprint, render_template, request, send_file, 
-    flash, session, current_app
+    flash, session, current_app, jsonify
 )
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -15,17 +16,38 @@ main_bp = Blueprint('main', __name__)
 counter_service = CounterService()
 file_processor = FileProcessor()
 
+# Dictionary to track active conversions
+active_conversions = {}
+
 @main_bp.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(error):
     flash("File is too large. Maximum upload size is 200MB.")
-    return render_template("index.html", pdf_url=None, view_url=None), 413
+    return jsonify({
+        'status': 'error',
+        'message': 'File is too large. Maximum upload size is 200MB.'
+    }), 413
 
 @main_bp.route("/", methods=["GET", "POST"])
 def index():
-    section = request.args.get('section', 'upload-section')
-    current_count = counter_service.get_count()
+    if request.method == "GET":
+        section = request.args.get('section', 'upload-section')
+        pdf_url = request.args.get('pdf_url')
+        view_url = request.args.get('view_url')
+        current_count = counter_service.get_count()
+        
+        return render_template(
+            "index.html", 
+            pdf_url=pdf_url, 
+            view_url=view_url, 
+            section=section,
+            converted_pdf_count=current_count
+        )
 
-    if request.method == "POST":
+    # Handle POST request
+    conversion_id = request.form.get('conversion_id', str(secrets.token_hex(8)))
+    active_conversions[conversion_id] = {'status': 'processing'}
+
+    try:
         # Clean up upload directory
         file_processor.cleanup_upload_dir()
 
@@ -41,75 +63,59 @@ def index():
             else:
                 file_paths.append(file_path)
 
-        # Build and cache file tree
-        file_tree = file_processor.build_file_tree(file_paths, Config.UPLOAD_DIR)
-
-        # Store session data
-        upload_token = secrets.token_hex(8)
-        json_file_path = os.path.join(Config.UPLOAD_DIR, f"{upload_token}.json")
-        with open(json_file_path, "w") as f:
-            import json
-            json.dump({"file_paths": file_paths, "file_tree": file_tree}, f)
-        session['upload_token'] = upload_token
+        # Check if conversion was cancelled
+        if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
+            return jsonify({'status': 'cancelled'})
 
         # Process settings
-        settings = {}
-        try:
-            settings['margin'] = int(request.form.get("margin", 10))
-        except ValueError:
-            settings['margin'] = 10
-        settings['header_note'] = request.form.get("header_note", "")
-        settings['footer_note'] = request.form.get("footer_note", "")
-        settings['orientation'] = request.form.get("orientation", "portrait")
-        settings['page_size'] = request.form.get("page_size", "letter")
-        settings['show_file_info'] = bool(request.form.get("show_file_info"))
-        settings['pdf_name'] = request.form.get("pdf_name", "UnifyDoc.pdf")
-        session['settings'] = settings
+        settings = {
+            'margin': int(request.form.get("margin", 10)),
+            'header_note': request.form.get("header_note", ""),
+            'footer_note': request.form.get("footer_note", ""),
+            'orientation': request.form.get("orientation", "portrait"),
+            'page_size': request.form.get("page_size", "letter"),
+            'show_file_info': bool(request.form.get("show_file_info")),
+            'pdf_name': request.form.get("pdf_name", "UnifyDoc.pdf")
+        }
 
-        # Handle immediate PDF generation if skip confirmation
-        if request.form.get("skip_confirmation"):
-            return generate_pdf_immediately(settings, file_paths, section)
+        # Generate PDF
+        pdf_name = generate_pdf_with_settings(settings, file_paths, conversion_id)
+        
+        # Check again if conversion was cancelled
+        if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
+            # Clean up generated files
+            output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
+            if os.path.exists(output_pdf_path):
+                os.remove(output_pdf_path)
+            return jsonify({'status': 'cancelled'})
 
-        return render_template(
-            "confirm.html", 
-            file_tree=file_tree, 
-            settings=settings, 
-            section=section,
-            converted_pdf_count=current_count
-        )
+        # Increment counter on success
+        counter_service.increment()
 
-    return render_template(
-        "index.html", 
-        pdf_url=None, 
-        view_url=None, 
-        section=section,
-        converted_pdf_count=current_count
-    )
+        # Clean up conversion tracking
+        active_conversions.pop(conversion_id, None)
 
-@main_bp.route("/generate", methods=["POST"])
-def generate():
-    selected_files = request.form.getlist("files")
-    settings = session.get('settings', {})
-    
-    # Generate PDF
-    pdf_name = generate_pdf_with_settings(settings, selected_files)
-    
-    # Increment counter
-    counter_service.increment()
-    
-    # Cleanup session data
-    upload_token = session.pop('upload_token', None)
-    if upload_token:
-        json_file_path = os.path.join(Config.UPLOAD_DIR, f"{upload_token}.json")
-        if os.path.exists(json_file_path):
-            os.remove(json_file_path)
-            
-    return render_template(
-        "index.html",
-        pdf_url=f"/download?pdf_name={pdf_name}",
-        view_url=f"/view?pdf_name={pdf_name}",
-        section="upload-section"
-    )
+        return jsonify({
+            'status': 'success',
+            'pdf_url': f"/download?pdf_name={pdf_name}",
+            'view_url': f"/view?pdf_name={pdf_name}"
+        })
+
+    except Exception as e:
+        active_conversions.pop(conversion_id, None)
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@main_bp.route("/cancel_conversion", methods=["POST"])
+def cancel_conversion():
+    """Handle conversion cancellation requests."""
+    conversion_id = request.headers.get('X-Conversion-ID')
+    if conversion_id and conversion_id in active_conversions:
+        active_conversions[conversion_id]['status'] = 'cancelled'
+        return jsonify({'status': 'success', 'message': 'Conversion cancelled'})
+    return jsonify({'status': 'error', 'message': 'Conversion not found'}), 404
 
 @main_bp.route("/download")
 def download_pdf():
@@ -123,19 +129,7 @@ def view_pdf():
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
     return send_file(output_pdf_path, as_attachment=False)
 
-def generate_pdf_immediately(settings, file_paths, section):
-    """Helper function to generate PDF without confirmation step."""
-    pdf_name = generate_pdf_with_settings(settings, file_paths)
-    counter_service.increment()
-    
-    return render_template(
-        "index.html",
-        pdf_url=f"/download?pdf_name={pdf_name}",
-        view_url=f"/view?pdf_name={pdf_name}",
-        section=section
-    )
-
-def generate_pdf_with_settings(settings, file_paths):
+def generate_pdf_with_settings(settings, file_paths, conversion_id):
     """Helper function to generate PDF with given settings."""
     page_size_option = settings.get("page_size", "letter")
     page_sizes = {
@@ -165,5 +159,9 @@ def generate_pdf_with_settings(settings, file_paths):
         show_file_info=settings.get("show_file_info", False)
     )
     
+    # Check for cancellation before starting generation
+    if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
+        return None
+        
     generator.generate(file_paths, output_pdf_path)
     return pdf_name 

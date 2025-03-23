@@ -86,6 +86,7 @@
   </script>
 
   <link rel="stylesheet" href="../static/css/index.css">
+  <link rel="stylesheet" href="../static/css/loading-popup.css">
   <script>
     function showSection(sectionId) {
         // Hide all sections
@@ -149,6 +150,15 @@
   </script>
 </head>
 <body>
+  <!-- Loading Popup -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-popup">
+      <div class="loading-spinner"></div>
+      <div class="loading-message">Your PDF is on the way :)</div>
+      <button id="loading-cancel-btn" class="loading-cancel-btn">Cancel</button>
+    </div>
+  </div>
+  
   <!-- Navigation Bar -->
   <nav class="navbar-container">
     <div class="nav" id="nav">
@@ -486,5 +496,6 @@
     });
 
   </script>
+  <script src="../static/js/loading-popup.js"></script>
 </body>
 </html>
