@@ -127,6 +127,22 @@
         document.getElementById('pdf-view-section').style.display = 'none';
         document.getElementById('form-section').style.display = 'block';
     }
+
+    // Add event listener to hide download section when new file is selected
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.querySelector('input[type="file"]');
+        fileInput.addEventListener('change', function() {
+            const downloadSection = document.querySelector('.download-section');
+            if (downloadSection) {
+                downloadSection.style.display = 'none';
+            }
+            // Also hide the PDF view section if it's visible
+            const pdfViewSection = document.getElementById('pdf-view-section');
+            if (pdfViewSection && pdfViewSection.style.display === 'block') {
+                exitView();
+            }
+        });
+    });
   </script>
   <!-- Removed PayPal subscription scripts since we're no longer using them -->
   <!-- Inline script for expandable list items -->
@@ -256,7 +272,7 @@
             </div>
           </div>
         </div>        
-    
+        
         <!-- Right Section: Upload Form and PDF Preview -->
         <div class="upload-sub-section right-section" id="upload-sec">
           <!-- Form and Download Options Container -->
@@ -267,6 +283,14 @@
                 <br><span>(200 MB upload limit)</span>
               </h2>
               <input type="file" name="files" class="file-input" multiple required>
+              {% if pdf_url %}
+              <div class="download-section">
+                <h3>View or Download your PDF:</h3>
+                <!-- Use the new function to enter view mode -->
+                <button onclick="enterView()">View</button>
+                <a href="{{ pdf_url }}" class="download-btn" download>Download</a>
+              </div>
+              {% endif %}
               <fieldset class="pdf-secttings-container">
                 <legend>PDF Settings</legend>
                 <div class="form-row">
@@ -313,14 +337,6 @@
               </fieldset>          
               <button type="submit">Convert to PDF</button>
             </form>
-            {% if pdf_url %}
-            <div class="download-section">
-              <h3>View or Download your PDF:</h3>
-              <!-- Use the new function to enter view mode -->
-              <button onclick="enterView()">View</button>
-              <a href="{{ pdf_url }}" class="download-btn" download>Download</a>
-            </div>
-            {% endif %}
           </div>
     
           <!-- PDF Preview Container (Initially Hidden) -->
