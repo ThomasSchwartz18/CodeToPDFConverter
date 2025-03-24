@@ -1,13 +1,10 @@
 import os
+import tempfile
 import secrets
 
 class Config:
-    # Environment
-    ENV = os.environ.get('FLASK_ENV', 'production')
-    DEBUG = ENV == 'development'
-    
     # File upload settings
-    UPLOAD_DIR = '/tmp'  # Use /tmp directory on Heroku and locally for simplicity
+    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
     MAX_CONTENT_LENGTH = 200 * 1024 * 1024  # 200MB max file size
     
     # File extensions
@@ -18,7 +15,7 @@ class Config:
     }
     
     # Security
-    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(16))
+    SECRET_KEY = secrets.token_hex(16)
     
     # PDF Settings
     DEFAULT_FONT_SIZE = 10
