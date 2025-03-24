@@ -9,12 +9,10 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from app.services.pdf_generator import PDFGenerator
 from app.services.file_processor import FileProcessor
-from app.services.counter_service import CounterService
 from app.services.github_service import GitHubService
 from app.config.settings import Config
 
 main_bp = Blueprint('main', __name__)
-counter_service = CounterService()
 file_processor = FileProcessor()
 github_service = GitHubService()
 
@@ -35,14 +33,12 @@ def index():
         section = request.args.get('section', 'upload-section')
         pdf_url = request.args.get('pdf_url')
         view_url = request.args.get('view_url')
-        current_count = counter_service.get_count()
         
         return render_template(
             "index.html", 
             pdf_url=pdf_url, 
             view_url=view_url, 
-            section=section,
-            converted_pdf_count=current_count
+            section=section
         )
 
     # Handle POST request
