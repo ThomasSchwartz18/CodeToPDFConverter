@@ -10,3 +10,5 @@ Jinja2
 MarkupSafe
 GitPython
 requests
+gitdb
+smmap

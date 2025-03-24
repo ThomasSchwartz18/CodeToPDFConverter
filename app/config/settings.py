@@ -4,7 +4,7 @@ import secrets
 
 class Config:
     # File upload settings
-    UPLOAD_DIR = os.path.join(tempfile.gettempdir(), "uploads")
+    UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
     MAX_CONTENT_LENGTH = 200 * 1024 * 1024  # 200MB max file size
     
     # File extensions
@@ -15,7 +15,7 @@ class Config:
     }
     
     # Security
-    SECRET_KEY = secrets.token_hex(16)
+    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(16))
     
     # PDF Settings
     DEFAULT_FONT_SIZE = 10
