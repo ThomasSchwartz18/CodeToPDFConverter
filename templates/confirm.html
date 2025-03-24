@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <title>Confirm File Selection</title>
   <link rel="stylesheet" href="../static/css/index.css">
+
+  <!-- Favicon for Browsers -->
+  <link rel="icon" type="image/svg+xml" href="../static/images/icon.svg">
+
+  <!-- Apple Touch Icon (for Safari on iOS) -->
+  <link rel="apple-touch-icon" href="../static/images/icon.svg">
+  
   <style>
     .confirmation-container {
         width: 100%;
@@ -54,6 +61,15 @@
         <h2>Confirm Files for PDF Conversion</h2>
         <p>Please uncheck any folders or individual files you do NOT want to include in the PDF.</p>
         <form action="/generate" method="post">
+          <!-- Hidden fields for PDF settings -->
+          <input type="hidden" name="margin" value="{{ request.form.get('margin', '10') }}">
+          <input type="hidden" name="header_note" value="{{ request.form.get('header_note', '') }}">
+          <input type="hidden" name="footer_note" value="{{ request.form.get('footer_note', '') }}">
+          <input type="hidden" name="orientation" value="{{ request.form.get('orientation', 'portrait') }}">
+          <input type="hidden" name="page_size" value="{{ request.form.get('page_size', 'letter') }}">
+          <input type="hidden" name="show_file_info" value="{{ request.form.get('show_file_info', '') }}">
+          <input type="hidden" name="pdf_name" value="{{ request.form.get('pdf_name', 'UnifyDoc.pdf') }}">
+          
           <div id="file-tree-container">
             {# Render files in the root (if any) #}
             {% for file in file_tree.files %}

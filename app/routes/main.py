@@ -3,7 +3,7 @@ import secrets
 import json
 from flask import (
     Blueprint, render_template, request, send_file, 
-    flash, session, current_app, jsonify
+    flash, session, current_app, jsonify, redirect, url_for
 )
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -128,6 +128,98 @@ def view_pdf():
     pdf_name = request.args.get("pdf_name", "UnifyDoc.pdf")
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
     return send_file(output_pdf_path, as_attachment=False)
+
+@main_bp.route("/confirm", methods=["GET", "POST"])
+def confirm():
+    if request.method == "POST":
+        # Process uploaded files
+        uploaded_files = request.files.getlist("files")
+        file_tree = {"files": [], "folders": []}
+        for file in uploaded_files:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(Config.UPLOAD_DIR, filename)
+            file.save(file_path)
+            if filename.endswith(".zip"):
+                # Process the zip file and get its extracted file paths
+                extracted_files = file_processor.process_zip(file_path)
+                # Get the zip folder name (without .zip)
+                zip_folder_name = os.path.splitext(filename)[0]
+                for extracted_file in extracted_files:
+                    # Skip any file or folder whose basename starts with "._"
+                    if os.path.basename(extracted_file).startswith("._"):
+                        continue
+                    relative_path = os.path.relpath(extracted_file, Config.UPLOAD_DIR)
+                    parts = relative_path.split(os.sep)
+                    # Skip system folders like __MACOSX or any part starting with "._"
+                    if parts[0] == "__MACOSX" or parts[0].startswith("._"):
+                        continue
+                    # Remove redundant top-level folder if it matches the zip file name
+                    if parts[0] == zip_folder_name:
+                        parts = parts[1:]
+                        if not parts:
+                            continue
+                    # Build file tree structure
+                    if len(parts) == 1:
+                        file_tree["files"].append({
+                            "name": parts[0],
+                            "full_path": extracted_file
+                        })
+                    else:
+                        current_folder = file_tree
+                        for part in parts[:-1]:
+                            if part == "__MACOSX" or part.startswith("._"):
+                                continue
+                            folder_found = None
+                            for folder in current_folder.get("folders", []):
+                                if folder["name"] == part:
+                                    folder_found = folder
+                                    break
+                            if folder_found is None:
+                                new_folder = {"name": part, "files": [], "folders": []}
+                                current_folder.setdefault("folders", []).append(new_folder)
+                                current_folder = new_folder
+                            else:
+                                current_folder = folder_found
+                        current_folder.setdefault("files", []).append({
+                            "name": parts[-1],
+                            "full_path": extracted_file,
+                            "indent": len(parts) * 20
+                        })
+            else:
+                file_tree["files"].append({
+                    "name": filename,
+                    "full_path": file_path
+                })
+        return render_template("confirm.html", file_tree=file_tree)
+    return redirect(url_for('main.index'))
+
+@main_bp.route("/generate", methods=["POST"])
+def generate():
+    try:
+        # Get selected files from confirmation page
+        selected_files = request.form.getlist("files")
+        
+        # Generate PDF with selected files
+        settings = {
+            'margin': int(request.form.get("margin", 10)),
+            'header_note': request.form.get("header_note", ""),
+            'footer_note': request.form.get("footer_note", ""),
+            'orientation': request.form.get("orientation", "portrait"),
+            'page_size': request.form.get("page_size", "letter"),
+            'show_file_info': bool(request.form.get("show_file_info")),
+            'pdf_name': request.form.get("pdf_name", "UnifyDoc.pdf")
+        }
+        
+        pdf_name = generate_pdf_with_settings(settings, selected_files, None)
+        
+        # Increment counter on success
+        counter_service.increment()
+        
+        return redirect(f"/?pdf_url=/download?pdf_name={pdf_name}&view_url=/view?pdf_name={pdf_name}")
+        
+    except Exception as e:
+        flash(str(e))
+        return redirect(url_for('main.index'))
 
 def generate_pdf_with_settings(settings, file_paths, conversion_id):
     """Helper function to generate PDF with given settings."""

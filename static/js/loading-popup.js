@@ -26,6 +26,15 @@ class LoadingPopup {
     async handleFormSubmit(e, form) {
         if (this.isConverting) return;
         
+        // Check if skip confirmation is unchecked
+        const skipConfirmation = form.querySelector('#skip_confirmation');
+        if (skipConfirmation && !skipConfirmation.checked) {
+            // Submit the form to the confirmation page
+            form.action = '/confirm';
+            form.submit();
+            return;
+        }
+        
         this.isConverting = true;
         this.show();
 
@@ -36,7 +45,7 @@ class LoadingPopup {
             this.currentConversionId = Date.now().toString();
             formData.append('conversion_id', this.currentConversionId);
             
-            const response = await fetch(form.action, {
+            const response = await fetch('/', {
                 method: 'POST',
                 body: formData
             });
