@@ -1,10 +1,13 @@
 import os
-import tempfile
 import secrets
 
 class Config:
     # File upload settings
-    UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    if 'DYNO' in os.environ:  # Check if we're on Heroku
+        UPLOAD_DIR = '/tmp/uploads'
+    else:
+        UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
+    
     MAX_CONTENT_LENGTH = 200 * 1024 * 1024  # 200MB max file size
     
     # File extensions
