@@ -10,13 +10,15 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from app.services.pdf_generator import PDFGenerator
 from app.services.file_processor import FileProcessor
 from app.services.counter_service import CounterService
+from app.services.github_service import GitHubService
 from app.config.settings import Config
 
 main_bp = Blueprint('main', __name__)
 counter_service = CounterService()
 file_processor = FileProcessor()
+github_service = GitHubService()
 
-# Dictionary to track active conversions
+# Dictionary to track active conversions and their resources
 active_conversions = {}
 
 @main_bp.errorhandler(RequestEntityTooLarge)
@@ -51,17 +53,39 @@ def index():
         # Clean up upload directory
         file_processor.cleanup_upload_dir()
 
+        file_paths = []
+        
+        # Process GitHub repository if URL is provided
+        github_url = request.form.get('github_url')
+        if github_url:
+            if not github_service.is_valid_github_url(github_url):
+                raise ValueError("Invalid GitHub repository URL")
+            
+            try:
+                repo_dir = github_service.clone_repository(github_url)
+                for root, _, files in os.walk(repo_dir):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        file_paths.append(file_path)
+                # Store the repo information for cleanup later
+                active_conversions[conversion_id]['github_repo'] = True
+            except Exception as e:
+                raise Exception(f"Failed to process GitHub repository: {str(e)}")
+            
         # Process uploaded files
         uploaded_files = request.files.getlist("files")
-        file_paths = []
         for file in uploaded_files:
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(Config.UPLOAD_DIR, filename)
-            file.save(file_path)
-            if filename.endswith(".zip"):
-                file_paths.extend(file_processor.process_zip(file_path))
-            else:
-                file_paths.append(file_path)
+            if file.filename:  # Only process if a file was actually selected
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(Config.UPLOAD_DIR, filename)
+                file.save(file_path)
+                if filename.endswith(".zip"):
+                    file_paths.extend(file_processor.process_zip(file_path))
+                else:
+                    file_paths.append(file_path)
+
+        if not file_paths:
+            raise ValueError("No files to process. Please provide either a GitHub repository URL or upload files.")
 
         # Check if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
@@ -81,27 +105,33 @@ def index():
         # Generate PDF
         pdf_name = generate_pdf_with_settings(settings, file_paths, conversion_id)
         
+        # Store the PDF name for later cleanup
+        active_conversions[conversion_id]['pdf_name'] = pdf_name
+
         # Check again if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
             # Clean up generated files
             output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
             if os.path.exists(output_pdf_path):
                 os.remove(output_pdf_path)
+            if github_url:
+                github_service.cleanup()
             return jsonify({'status': 'cancelled'})
-
-        # Increment counter on success
-        counter_service.increment()
 
         # Clean up conversion tracking
         active_conversions.pop(conversion_id, None)
 
         return jsonify({
             'status': 'success',
-            'pdf_url': f"/download?pdf_name={pdf_name}",
-            'view_url': f"/view?pdf_name={pdf_name}"
+            'pdf_url': f"/download?pdf_name={pdf_name}&conversion_id={conversion_id}",
+            'view_url': f"/view?pdf_name={pdf_name}&conversion_id={conversion_id}"
         })
 
     except Exception as e:
+        # Clean up GitHub repository if it was used
+        if 'github_url' in locals():
+            github_service.cleanup()
+        
         active_conversions.pop(conversion_id, None)
         return jsonify({
             'status': 'error',
@@ -120,8 +150,23 @@ def cancel_conversion():
 @main_bp.route("/download")
 def download_pdf():
     pdf_name = request.args.get("pdf_name", "UnifyDoc.pdf")
+    conversion_id = request.args.get("conversion_id")
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
-    return send_file(output_pdf_path, as_attachment=True, download_name=pdf_name)
+    
+    # Send the file
+    response = send_file(output_pdf_path, as_attachment=True, download_name=pdf_name)
+    
+    # Clean up after sending the file
+    @response.call_on_close
+    def cleanup():
+        # Clean up GitHub repository if it was used
+        if conversion_id and conversion_id in active_conversions:
+            if active_conversions[conversion_id].get('github_repo'):
+                github_service.cleanup()
+            # Remove the conversion tracking
+            active_conversions.pop(conversion_id, None)
+    
+    return response
 
 @main_bp.route("/view")
 def view_pdf():

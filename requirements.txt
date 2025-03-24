@@ -8,3 +8,5 @@ click
 itsdangerous
 Jinja2
 MarkupSafe
+GitPython
+requests

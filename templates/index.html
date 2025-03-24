@@ -128,20 +128,81 @@
         document.getElementById('form-section').style.display = 'block';
     }
 
-    // Add event listener to hide download section when new file is selected
     document.addEventListener('DOMContentLoaded', function() {
         const fileInput = document.querySelector('input[type="file"]');
-        fileInput.addEventListener('change', function() {
-            const downloadSection = document.querySelector('.download-section');
-            if (downloadSection) {
-                downloadSection.style.display = 'none';
-            }
-            // Also hide the PDF view section if it's visible
-            const pdfViewSection = document.getElementById('pdf-view-section');
-            if (pdfViewSection && pdfViewSection.style.display === 'block') {
-                exitView();
+        const githubInput = document.querySelector('input[name="github_url"]');
+        const form = document.querySelector('form');
+        const selectorBubbles = document.querySelectorAll('.selector-bubble');
+        const fileSection = document.getElementById('file-input-section');
+        const githubSection = document.getElementById('github-input-section');
+
+        // Handle input type selection
+        selectorBubbles.forEach(bubble => {
+            bubble.addEventListener('click', function() {
+                // Update active state of bubbles
+                selectorBubbles.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show/hide appropriate input section
+                const inputType = this.getAttribute('data-input-type');
+                if (inputType === 'file') {
+                    fileSection.style.display = 'flex';
+                    githubSection.style.display = 'none';
+                    fileInput.required = true;
+                    githubInput.value = '';
+                    setTimeout(() => {
+                        githubSection.classList.remove('visible');
+                    }, 50);
+                } else {
+                    fileSection.style.display = 'none';
+                    githubSection.style.display = 'block';
+                    fileInput.required = false;
+                    fileInput.value = '';
+                    setTimeout(() => {
+                        githubSection.classList.add('visible');
+                    }, 50);
+                }
+
+                // Clear the download section if it exists
+                const downloadSection = document.querySelector('.download-section');
+                if (downloadSection) {
+                    downloadSection.style.display = 'none';
+                }
+                // Hide PDF view section if it's visible
+                const pdfViewSection = document.getElementById('pdf-view-section');
+                if (pdfViewSection && pdfViewSection.style.display === 'block') {
+                    exitView();
+                }
+            });
+        });
+
+        // Form validation - only on actual form submission
+        form.addEventListener('submit', function(e) {
+            // Check if this is a real form submission (not a view button click)
+            const submitter = e.submitter;
+            if (!submitter || submitter.type === 'submit') {
+                const activeInput = document.querySelector('.selector-bubble.active').getAttribute('data-input-type');
+                const hasFiles = fileInput.files.length > 0;
+                const hasGithubUrl = githubInput.value.trim() !== '';
+
+                if ((activeInput === 'file' && !hasFiles) || 
+                    (activeInput === 'github' && !hasGithubUrl)) {
+                    e.preventDefault();
+                    alert(activeInput === 'file' 
+                        ? 'Please select a file to upload.' 
+                        : 'Please enter a GitHub repository URL.');
+                }
             }
         });
+
+        // Prevent form submission when clicking view/download buttons
+        const viewButton = document.querySelector('button[onclick="enterView()"]');
+        if (viewButton) {
+            viewButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                enterView();
+            });
+        }
     });
   </script>
   <!-- Removed PayPal subscription scripts since we're no longer using them -->
@@ -211,7 +272,7 @@
   <div id="upload-section" class="upload-container" style="display: {% if section=='upload-section' %}flex{% else %}none{% endif %};">
     <div class="upload">
       <h1 id="animated-heading">Let's convert smarter<br>together<span class="dots">...</span></h1>
-      <div id="pdf-counter" class="conversion-counter">Converted PDFs: <span id="pdf-count">0</span></div>
+      <div id="pdf-counter" class="conversion-counter">Converted PDFs: <span id="pdf-count">350+</span></div>
       <div class="flowchart-container">
         <div class="flowchart-box box-1">Zipped Code Projects</div>
         <div class="flowchart-arrow box-1">+</div>
@@ -279,10 +340,8 @@
           <div id="form-section">
             <form action="/" method="post" enctype="multipart/form-data">
               <h2>
-                Upload text document or ZIP Folder
-                <br><span>(200 MB upload limit)</span>
+                Choose Upload Type
               </h2>
-              <input type="file" name="files" class="file-input" multiple required>
               {% if pdf_url %}
               <div class="download-section">
                 <h3>View or Download your PDF:</h3>
@@ -291,6 +350,38 @@
                 <a href="{{ pdf_url }}" class="download-btn" download>Download</a>
               </div>
               {% endif %}
+              <!-- Input Type Selection -->
+              <div class="input-type-selector">
+                <div class="selector-container">
+                  <button type="button" class="selector-bubble active" data-input-type="file">
+                    <span class="bubble-icon">📁</span>
+                    Folder/File
+                  </button>
+                  <button type="button" class="selector-bubble" data-input-type="github">
+                    <span class="bubble-icon">🔗</span>
+                    GitHub Repo
+                  </button>
+                </div>
+              </div>
+
+              <!-- File Input Section -->
+              <div class="input-section file-section" id="file-input-section">
+                <input type="file" name="files" class="file-input" multiple>
+                <div class="file-input-info">
+                  <small>Upload text document or ZIP Folder<br><span>(200 MB upload limit)</span></small>
+                </div>
+              </div>
+
+              <!-- GitHub Repository Input -->
+              <div class="input-section github-section" id="github-input-section" style="display: none;">
+                <div class="github-input-container">
+                  <input type="text" name="github_url" class="github-input" placeholder="https://github.com/username/repository">
+                  <div class="file-input-info">
+                    <small>Upload a Github repository link<br><span>to convert all files within the repository.</span></small>
+                  </div>
+                </div>
+              </div>
+
               <fieldset class="pdf-secttings-container">
                 <legend>PDF Settings</legend>
                 <div class="form-row">
@@ -440,7 +531,7 @@
   </section>  
 
   <footer>
-    <p>Last updated: March 16, 2025</p>
+    <p>Last updated: March 23, 2025</p>
     <p>&copy; 2025 N&T Development</p>
   </footer>
   <script>
@@ -481,34 +572,29 @@
     });
 
     // Add conversion count animation
-    document.addEventListener("DOMContentLoaded", function () {
-      const counterElement = document.getElementById('pdf-counter');
-      const pdfCountElement = document.getElementById('pdf-count');
+    document.addEventListener("DOMContentLoaded", function() {
+        const pdfCountElement = document.getElementById('pdf-count');
+        const targetCount = 350;
+        let currentCount = 0;
+        const duration = 2000; // 2 seconds for the animation
+        const framesPerSecond = 60;
+        const totalFrames = duration / 1000 * framesPerSecond;
+        const incrementPerFrame = targetCount / totalFrames;
 
-      fetch('/api/pdf_count')
-        .then(response => response.json())
-        .then(data => {
-          let targetCount = data.count;
-          let currentCount = 0;
-          let increment = Math.ceil(targetCount / 100);
-
-          counterElement.style.opacity = "1";
-
-          function updateCount() {
-            currentCount += increment;
-            if (currentCount >= targetCount) {
-              pdfCountElement.textContent = targetCount;
-            } else {
-              pdfCountElement.textContent = currentCount;
-              requestAnimationFrame(updateCount);
+        function updateCount() {
+            if (currentCount < targetCount) {
+                currentCount += incrementPerFrame;
+                if (currentCount >= targetCount) {
+                    pdfCountElement.textContent = "350+";
+                } else {
+                    pdfCountElement.textContent = Math.floor(currentCount);
+                }
+                requestAnimationFrame(updateCount);
             }
-          }
+        }
 
-          updateCount();
-        })
-        .catch(err => {
-          console.error("Error fetching PDF count:", err);
-        });
+        // Start the animation
+        requestAnimationFrame(updateCount);
     });
 
   </script>
