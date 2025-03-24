@@ -1,1 +1,1 @@
-web: gunicorn run:app --log-file=- --error-logfile=- --capture-output
+web: gunicorn run:app --log-level debug --timeout 120 --preload
