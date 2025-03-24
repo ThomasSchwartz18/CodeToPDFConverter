@@ -5,9 +5,12 @@ import sys
 
 def create_app(config_class=Config):
     try:
+        # Get the absolute path to the root directory
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
         app = Flask(__name__, 
-                    template_folder='../templates',
-                    static_folder='../static')
+                    template_folder=os.path.join(root_dir, 'templates'),
+                    static_folder=os.path.join(root_dir, 'static'))
         
         app.config.from_object(config_class)
         
