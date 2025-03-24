@@ -3,11 +3,7 @@ import secrets
 
 class Config:
     # File upload settings
-    if 'DYNO' in os.environ:  # Check if we're on Heroku
-        UPLOAD_DIR = '/tmp/uploads'
-    else:
-        UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
-    
+    UPLOAD_DIR = '/tmp'  # Use /tmp directory on Heroku and locally for simplicity
     MAX_CONTENT_LENGTH = 200 * 1024 * 1024  # 200MB max file size
     
     # File extensions
@@ -24,7 +20,4 @@ class Config:
     DEFAULT_FONT_SIZE = 10
     DEFAULT_LINE_HEIGHT = 12
     DEFAULT_MARGIN = 10
-    MAX_CHARS_PER_LINE = 90
-    
-    # Ensure upload directory exists
-    os.makedirs(UPLOAD_DIR, exist_ok=True) 
+    MAX_CHARS_PER_LINE = 90 
