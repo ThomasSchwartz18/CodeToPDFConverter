@@ -54,9 +54,9 @@ class PDFGenerator:
                 file_extension not in Config.IMAGE_EXTENSIONS):
                 continue
 
-            # Compute relative path
-            relative_path = (os.path.relpath(file_path, Config.UPLOAD_DIR) 
-                           if Config.UPLOAD_DIR in file_path else file_path)
+            # Compute relative path and sanitize it
+            relative_path = os.path.relpath(file_path, Config.UPLOAD_DIR)
+            sanitized_path = relative_path.split(os.sep, 1)[-1]  # removes conversion_id folder
 
             # Handle PDF files
             if file_extension == ".pdf":
@@ -74,7 +74,7 @@ class PDFGenerator:
             y_position = self.margin
 
             # Insert header and file info
-            y_position = self._insert_page_header(page, y_position, file_name, relative_path)
+            y_position = self._insert_page_header(page, y_position, file_name, sanitized_path)
 
             # Handle images
             if file_extension in Config.IMAGE_EXTENSIONS:
@@ -119,7 +119,7 @@ class PDFGenerator:
                                 page = doc.new_page(width=page_width, height=page_height)
                                 y_position = self.margin
                                 y_position = self._insert_page_header(page, y_position, 
-                                                                    file_name, relative_path)
+                                                                    file_name, sanitized_path)
                                 
                             page.insert_text((self.margin, y_position), wrapped_line, 
                                            fontsize=self.font_size, fontname="courier")

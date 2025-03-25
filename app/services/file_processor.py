@@ -5,13 +5,28 @@ from app.utils.security import is_safe_path
 
 class FileProcessor:
     @staticmethod
-    def process_zip(zip_path):
+    def get_upload_dir(conversion_id):
+        upload_path = os.path.join(Config.UPLOAD_DIR, conversion_id)
+        os.makedirs(upload_path, exist_ok=True)
+        return upload_path
+
+    @staticmethod
+    def cleanup_conversion_files(conversion_id):
+        path = os.path.join(Config.UPLOAD_DIR, conversion_id)
+        if os.path.exists(path):
+            import shutil
+            shutil.rmtree(path, ignore_errors=True)
+
+    @staticmethod
+    def process_zip(zip_path, conversion_id):
         """
         Extracts files from a ZIP folder and returns a list of file paths.
         Ensures no directory traversal attacks are possible.
         """
-        extracted_folder = os.path.join(Config.UPLOAD_DIR, 
-                                      os.path.basename(zip_path).replace(".zip", ""))
+        extracted_folder = os.path.join(
+            FileProcessor.get_upload_dir(conversion_id),
+            os.path.basename(zip_path).replace(".zip", "")
+        )
         os.makedirs(extracted_folder, exist_ok=True)
         
         file_paths = []

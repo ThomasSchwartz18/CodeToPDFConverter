@@ -43,8 +43,8 @@ def index():
     conversion_id = request.form.get('conversion_id', secrets.token_hex(16))
     active_conversions[conversion_id] = {'status': 'processing'}
     try:
-        # Clean up upload directory
-        file_processor.cleanup_upload_dir()
+        # Get isolated upload directory for this conversion
+        upload_dir = file_processor.get_upload_dir(conversion_id)
         file_paths = []
         
         # Process GitHub repository if URL is provided
@@ -68,10 +68,10 @@ def index():
         for file in uploaded_files:
             if file.filename:  # Only process if a file was actually selected
                 filename = secure_filename(file.filename)
-                file_path = os.path.join(Config.UPLOAD_DIR, filename)
+                file_path = os.path.join(upload_dir, filename)
                 file.save(file_path)
                 if filename.endswith(".zip"):
-                    file_paths.extend(file_processor.process_zip(file_path))
+                    file_paths.extend(file_processor.process_zip(file_path, conversion_id))
                 else:
                     file_paths.append(file_path)
                     
@@ -80,6 +80,7 @@ def index():
         
         # Check if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
+            file_processor.cleanup_conversion_files(conversion_id)
             return jsonify({'status': 'cancelled'})
         
         # Process settings
@@ -113,6 +114,7 @@ def index():
                 os.remove(output_pdf_path)
             if github_url:
                 github_service.cleanup()
+            file_processor.cleanup_conversion_files(conversion_id)
             return jsonify({'status': 'cancelled'})
         
         active_conversions.pop(conversion_id, None)
@@ -124,6 +126,7 @@ def index():
     except Exception as e:
         if 'github_url' in locals():
             github_service.cleanup()
+        file_processor.cleanup_conversion_files(conversion_id)
         active_conversions.pop(conversion_id, None)
         return jsonify({
             'status': 'error',
@@ -171,6 +174,7 @@ def generate_pdf_confirmed():
             'view_url': f"/view?pdf_name={pdf_name}&conversion_id={conversion_id}"
         })
     except Exception as e:
+        file_processor.cleanup_conversion_files(conversion_id)
         active_conversions.pop(conversion_id, None)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -179,6 +183,7 @@ def cancel_conversion():
     conversion_id = request.headers.get('X-Conversion-ID')
     if conversion_id and conversion_id in active_conversions:
         active_conversions[conversion_id]['status'] = 'cancelled'
+        file_processor.cleanup_conversion_files(conversion_id)
         return jsonify({'status': 'success', 'message': 'Conversion cancelled'})
     return jsonify({'status': 'error', 'message': 'Conversion not found'}), 404
 
@@ -191,9 +196,10 @@ def download_pdf():
     
     @response.call_on_close
     def cleanup():
-        if conversion_id and conversion_id in active_conversions:
-            if active_conversions[conversion_id].get('github_repo'):
+        if conversion_id:
+            if active_conversions.get(conversion_id, {}).get('github_repo'):
                 github_service.cleanup()
+            file_processor.cleanup_conversion_files(conversion_id)
             active_conversions.pop(conversion_id, None)
     return response
 
