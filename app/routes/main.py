@@ -3,7 +3,7 @@ import secrets
 import json
 from flask import (
     Blueprint, render_template, request, send_file,
-    flash, session, current_app, jsonify
+    flash, session, current_app, jsonify, redirect
 )
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -15,6 +15,7 @@ from app.config.settings import Config
 main_bp = Blueprint('main', __name__)
 file_processor = FileProcessor()
 github_service = GitHubService()
+
 # Dictionary to track active conversions and their resources
 active_conversions = {}
 
@@ -39,12 +40,13 @@ def index():
             section=section
         )
     # Handle POST request
-    conversion_id = request.form.get('conversion_id', str(secrets.token_hex(8)))
+    conversion_id = request.form.get('conversion_id', secrets.token_hex(16))
     active_conversions[conversion_id] = {'status': 'processing'}
     try:
         # Clean up upload directory
         file_processor.cleanup_upload_dir()
         file_paths = []
+        
         # Process GitHub repository if URL is provided
         github_url = request.form.get('github_url')
         if github_url:
@@ -60,6 +62,7 @@ def index():
                 active_conversions[conversion_id]['github_repo'] = True
             except Exception as e:
                 raise Exception(f"Failed to process GitHub repository: {str(e)}")
+        
         # Process uploaded files
         uploaded_files = request.files.getlist("files")
         for file in uploaded_files:
@@ -71,13 +74,14 @@ def index():
                     file_paths.extend(file_processor.process_zip(file_path))
                 else:
                     file_paths.append(file_path)
+                    
         if not file_paths:
-            raise ValueError(
-                "No files to process. Please provide either a GitHub repository URL or upload files."
-            )
+            raise ValueError("No files to process. Please provide either a GitHub repository URL or upload files.")
+        
         # Check if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
             return jsonify({'status': 'cancelled'})
+        
         # Process settings
         settings = {
             'margin': int(request.form.get("margin", 10)),
@@ -88,20 +92,29 @@ def index():
             'show_file_info': bool(request.form.get("show_file_info")),
             'pdf_name': request.form.get("pdf_name", "UnifyDoc.pdf")
         }
-        # Generate PDF
+        
+        # If "Skip file confirmation" is unchecked, skip PDF generation and redirect to confirmation
+        if not request.form.get('skip_confirmation'):
+            active_conversions[conversion_id]['settings'] = settings
+            active_conversions[conversion_id]['file_paths'] = file_paths
+            return jsonify({
+                'status': 'confirm_required',
+                'redirect_url': f"/confirm?conversion_id={conversion_id}"
+            })
+        
+        # Otherwise, proceed immediately with PDF generation
         pdf_name = generate_pdf_with_settings(settings, file_paths, conversion_id)
-        # Store the PDF name for later cleanup
         active_conversions[conversion_id]['pdf_name'] = pdf_name
+        
         # Check again if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
-            # Clean up generated files
             output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
             if os.path.exists(output_pdf_path):
                 os.remove(output_pdf_path)
             if github_url:
                 github_service.cleanup()
             return jsonify({'status': 'cancelled'})
-        # Clean up conversion tracking
+        
         active_conversions.pop(conversion_id, None)
         return jsonify({
             'status': 'success',
@@ -109,7 +122,6 @@ def index():
             'view_url': f"/view?pdf_name={pdf_name}&conversion_id={conversion_id}"
         })
     except Exception as e:
-        # Clean up GitHub repository if it was used
         if 'github_url' in locals():
             github_service.cleanup()
         active_conversions.pop(conversion_id, None)
@@ -118,9 +130,52 @@ def index():
             'message': str(e)
         }), 500
 
+@main_bp.route("/confirm", methods=["GET"])
+def confirm_files():
+    conversion_id = request.args.get('conversion_id')
+    conversion = active_conversions.get(conversion_id)
+    if not conversion:
+        flash("Session expired or invalid.", "error")
+        return redirect("/")
+    file_paths = conversion.get('file_paths', [])
+    file_tree = file_processor.build_file_tree(file_paths, Config.UPLOAD_DIR)
+    return render_template("confirm.html", file_tree=file_tree, conversion_id=conversion_id)
+
+@main_bp.route("/generate", methods=["POST"])
+def generate_pdf_confirmed():
+    """
+    This route is triggered from the confirmation page (confirm.html).
+    It receives the user's file selection and generates the PDF using
+    the settings stored earlier.
+    """
+    # Try to get conversion_id from POST data; fallback to query string if needed
+    conversion_id = request.form.get('conversion_id') or request.args.get('conversion_id')
+    if not conversion_id or conversion_id not in active_conversions:
+        return jsonify({'status': 'error', 'message': 'Conversion session expired or invalid.'}), 400
+
+    settings = active_conversions[conversion_id].get('settings')
+    if not settings:
+        return jsonify({'status': 'error', 'message': 'Missing conversion settings.'}), 400
+
+    selected_files = request.form.getlist("files")
+    if not selected_files:
+        return jsonify({'status': 'error', 'message': 'No files selected for PDF generation.'}), 400
+
+    try:
+        pdf_name = generate_pdf_with_settings(settings, selected_files, conversion_id)
+        active_conversions[conversion_id]['pdf_name'] = pdf_name
+        active_conversions.pop(conversion_id, None)
+        return jsonify({
+            'status': 'success',
+            'pdf_url': f"/download?pdf_name={pdf_name}&conversion_id={conversion_id}",
+            'view_url': f"/view?pdf_name={pdf_name}&conversion_id={conversion_id}"
+        })
+    except Exception as e:
+        active_conversions.pop(conversion_id, None)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @main_bp.route("/cancel_conversion", methods=["POST"])
 def cancel_conversion():
-    """Handle conversion cancellation requests."""
     conversion_id = request.headers.get('X-Conversion-ID')
     if conversion_id and conversion_id in active_conversions:
         active_conversions[conversion_id]['status'] = 'cancelled'
@@ -132,16 +187,13 @@ def download_pdf():
     pdf_name = request.args.get("pdf_name", "UnifyDoc.pdf")
     conversion_id = request.args.get("conversion_id")
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
-    # Send the file
     response = send_file(output_pdf_path, as_attachment=True, download_name=pdf_name)
-    # Clean up after sending the file
+    
     @response.call_on_close
     def cleanup():
-        # Clean up GitHub repository if it was used
         if conversion_id and conversion_id in active_conversions:
             if active_conversions[conversion_id].get('github_repo'):
                 github_service.cleanup()
-            # Remove the conversion tracking
             active_conversions.pop(conversion_id, None)
     return response
 
@@ -152,7 +204,6 @@ def view_pdf():
     return send_file(output_pdf_path, as_attachment=False)
 
 def generate_pdf_with_settings(settings, file_paths, conversion_id):
-    """Helper function to generate PDF with given settings."""
     page_size_option = settings.get("page_size", "letter")
     page_sizes = {
         "letter": (612, 792),
@@ -162,11 +213,13 @@ def generate_pdf_with_settings(settings, file_paths, conversion_id):
     page_size = page_sizes.get(page_size_option, (612, 792))
     if settings.get("orientation") == "landscape":
         page_size = (page_size[1], page_size[0])
+    
     pdf_name_input = settings.get("pdf_name", "").strip()
     if not pdf_name_input or pdf_name_input == "UnifyDoc.pdf":
         pdf_name = f"UnifyDoc-{secrets.token_hex(8)}.pdf"
     else:
         pdf_name = secure_filename(pdf_name_input)
+    
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
     generator = PDFGenerator(
         margin=settings.get("margin", 10),
@@ -176,7 +229,6 @@ def generate_pdf_with_settings(settings, file_paths, conversion_id):
         page_size=page_size,
         show_file_info=settings.get("show_file_info", False)
     )
-    # Check for cancellation before starting generation
     if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
         return None
     generator.generate(file_paths, output_pdf_path)

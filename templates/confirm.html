@@ -54,6 +54,7 @@
         <h2>Confirm Files for PDF Conversion</h2>
         <p>Please uncheck any folders or individual files you do NOT want to include in the PDF.</p>
         <form action="/generate" method="post">
+          <input type="hidden" name="conversion_id" value="{{ conversion_id }}">
           <div id="file-tree-container">
             {# Render files in the root (if any) #}
             {% for file in file_tree.files %}
@@ -141,6 +142,29 @@
         window.location.href = "/";
       }
     }
+    document.addEventListener("DOMContentLoaded", function() {
+      const form = document.querySelector("form");
+      form.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const formData = new FormData(form);
+        try {
+          const response = await fetch(form.action, {
+            method: "POST",
+            body: formData
+          });
+          const result = await response.json();
+          if (result.status === "success") {
+            // Redirect to index page with pdf and view URLs as query parameters
+            window.location.href = `/?pdf_url=${encodeURIComponent(result.pdf_url)}&view_url=${encodeURIComponent(result.view_url)}`;
+          } else {
+            alert(result.message || "PDF generation failed.");
+          }
+        } catch (error) {
+          console.error("Error generating PDF:", error);
+          alert("An error occurred during PDF generation. Please try again.");
+        }
+      });
+    });
   </script>
 </body>
 </html>
