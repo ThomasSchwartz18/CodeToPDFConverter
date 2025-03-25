@@ -1,9 +1,10 @@
 import os
 import secrets
 import json
+import uuid
 from flask import (
     Blueprint, render_template, request, send_file,
-    flash, session, current_app, jsonify, redirect
+    flash, session, current_app, jsonify, redirect, abort
 )
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -40,7 +41,9 @@ def index():
             section=section
         )
     # Handle POST request
-    conversion_id = request.form.get('conversion_id', secrets.token_hex(16))
+    # Always generate conversion_id securely on server-side
+    conversion_id = uuid.uuid4().hex  # Generates a unique, secure 32-char hex id
+    session['conversion_id'] = conversion_id  # Securely store in Flask session
     active_conversions[conversion_id] = {'status': 'processing'}
     try:
         # Get isolated upload directory for this conversion
@@ -81,6 +84,7 @@ def index():
         # Check if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
             file_processor.cleanup_conversion_files(conversion_id)
+            session.pop('conversion_id', None)  # Clear session on cancellation
             return jsonify({'status': 'cancelled'})
         
         # Process settings
@@ -109,25 +113,28 @@ def index():
         
         # Check again if conversion was cancelled
         if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
-            output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
+            output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
             if os.path.exists(output_pdf_path):
                 os.remove(output_pdf_path)
             if github_url:
                 github_service.cleanup()
             file_processor.cleanup_conversion_files(conversion_id)
+            session.pop('conversion_id', None)  # Clear session on cancellation
             return jsonify({'status': 'cancelled'})
         
+        # Don't clear session here - wait until after download/view
         active_conversions.pop(conversion_id, None)
         return jsonify({
             'status': 'success',
-            'pdf_url': f"/download?pdf_name={pdf_name}&conversion_id={conversion_id}",
-            'view_url': f"/view?pdf_name={pdf_name}&conversion_id={conversion_id}"
+            'pdf_url': f"/download?pdf_name={pdf_name}",
+            'view_url': f"/view?pdf_name={pdf_name}"
         })
     except Exception as e:
         if 'github_url' in locals():
             github_service.cleanup()
         file_processor.cleanup_conversion_files(conversion_id)
         active_conversions.pop(conversion_id, None)
+        session.pop('conversion_id', None)  # Clear session on error
         return jsonify({
             'status': 'error',
             'message': str(e)
@@ -135,7 +142,10 @@ def index():
 
 @main_bp.route("/confirm", methods=["GET"])
 def confirm_files():
-    conversion_id = request.args.get('conversion_id')
+    conversion_id = session.get('conversion_id')
+    if not conversion_id:
+        flash("Session expired or invalid.", "error")
+        return redirect("/")
     conversion = active_conversions.get(conversion_id)
     if not conversion:
         flash("Session expired or invalid.", "error")
@@ -151,10 +161,9 @@ def generate_pdf_confirmed():
     It receives the user's file selection and generates the PDF using
     the settings stored earlier.
     """
-    # Try to get conversion_id from POST data; fallback to query string if needed
-    conversion_id = request.form.get('conversion_id') or request.args.get('conversion_id')
+    conversion_id = session.get('conversion_id')
     if not conversion_id or conversion_id not in active_conversions:
-        return jsonify({'status': 'error', 'message': 'Conversion session expired or invalid.'}), 400
+        abort(403)  # Forbidden access if conversion_id is invalid or missing
 
     settings = active_conversions[conversion_id].get('settings')
     if not settings:
@@ -167,31 +176,43 @@ def generate_pdf_confirmed():
     try:
         pdf_name = generate_pdf_with_settings(settings, selected_files, conversion_id)
         active_conversions[conversion_id]['pdf_name'] = pdf_name
+        # Don't clear session here - wait until after download/view
         active_conversions.pop(conversion_id, None)
         return jsonify({
             'status': 'success',
-            'pdf_url': f"/download?pdf_name={pdf_name}&conversion_id={conversion_id}",
-            'view_url': f"/view?pdf_name={pdf_name}&conversion_id={conversion_id}"
+            'pdf_url': f"/download?pdf_name={pdf_name}",
+            'view_url': f"/view?pdf_name={pdf_name}"
         })
     except Exception as e:
         file_processor.cleanup_conversion_files(conversion_id)
         active_conversions.pop(conversion_id, None)
+        session.pop('conversion_id', None)  # Clear session on error
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @main_bp.route("/cancel_conversion", methods=["POST"])
 def cancel_conversion():
-    conversion_id = request.headers.get('X-Conversion-ID')
+    conversion_id = session.get('conversion_id')
     if conversion_id and conversion_id in active_conversions:
         active_conversions[conversion_id]['status'] = 'cancelled'
         file_processor.cleanup_conversion_files(conversion_id)
+        session.pop('conversion_id', None)  # Clear session after cancellation
         return jsonify({'status': 'success', 'message': 'Conversion cancelled'})
     return jsonify({'status': 'error', 'message': 'Conversion not found'}), 404
 
 @main_bp.route("/download")
 def download_pdf():
     pdf_name = request.args.get("pdf_name", "UnifyDoc.pdf")
-    conversion_id = request.args.get("conversion_id")
-    output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
+    conversion_id = session.get('conversion_id')
+    if not conversion_id:
+        abort(403)  # Forbidden access if no conversion_id in session
+
+    output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
+    print(f"Trying to serve file from: {output_pdf_path}")  # Debug log
+    
+    if not os.path.exists(output_pdf_path):
+        print(f"File not found at: {output_pdf_path}")  # Debug log
+        abort(404)  # File not found
+
     response = send_file(output_pdf_path, as_attachment=True, download_name=pdf_name)
     
     @response.call_on_close
@@ -201,12 +222,24 @@ def download_pdf():
                 github_service.cleanup()
             file_processor.cleanup_conversion_files(conversion_id)
             active_conversions.pop(conversion_id, None)
+            session.pop('conversion_id', None)  # Only clear session here, after download
     return response
 
 @main_bp.route("/view")
 def view_pdf():
     pdf_name = request.args.get("pdf_name", "UnifyDoc.pdf")
-    output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
+    conversion_id = session.get('conversion_id')
+    if not conversion_id:
+        abort(403)  # Forbidden access if no conversion_id in session
+
+    output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
+    print(f"Trying to serve file from: {output_pdf_path}")  # Debug log
+    
+    if not os.path.exists(output_pdf_path):
+        print(f"File not found at: {output_pdf_path}")  # Debug log
+        abort(404)  # File not found
+
+    # Do NOT cleanup session here, as user might still download afterward
     return send_file(output_pdf_path, as_attachment=False)
 
 def generate_pdf_with_settings(settings, file_paths, conversion_id):
@@ -226,7 +259,9 @@ def generate_pdf_with_settings(settings, file_paths, conversion_id):
     else:
         pdf_name = secure_filename(pdf_name_input)
     
-    output_pdf_path = os.path.join(Config.UPLOAD_DIR, pdf_name)
+    output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
+    print(f"Generating PDF at: {output_pdf_path}")  # Debug log
+    
     generator = PDFGenerator(
         margin=settings.get("margin", 10),
         header_note=settings.get("header_note", ""),
@@ -238,4 +273,6 @@ def generate_pdf_with_settings(settings, file_paths, conversion_id):
     if active_conversions.get(conversion_id, {}).get('status') == 'cancelled':
         return None
     generator.generate(file_paths, output_pdf_path)
+    # Set proper file permissions for Heroku
+    os.chmod(output_pdf_path, 0o644)
     return pdf_name

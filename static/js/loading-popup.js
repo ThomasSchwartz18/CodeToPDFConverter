@@ -3,7 +3,6 @@ class LoadingPopup {
         this.overlay = document.getElementById('loading-overlay');
         this.cancelButton = document.getElementById('loading-cancel-btn');
         this.isConverting = false;
-        this.currentConversionId = null;
         this.setupEventListeners();
     }
 
@@ -29,9 +28,6 @@ class LoadingPopup {
         const skipConfirmation = skipConfirmationCheckbox ? skipConfirmationCheckbox.checked : true;
 
         const formData = new FormData(form);
-        // Generate and append a conversion ID
-        this.currentConversionId = Date.now().toString();
-        formData.append('conversion_id', this.currentConversionId);
 
         if (!skipConfirmation) {
             // Show a persistent overlay with a message so the user knows file tree is being built
@@ -77,7 +73,6 @@ class LoadingPopup {
             this.showMessage('Error during conversion. Please try again.');
         } finally {
             this.isConverting = false;
-            this.currentConversionId = null;
             this.hide();
         }
     }
@@ -106,19 +101,14 @@ class LoadingPopup {
     }
 
     async cancel() {
-        if (!this.isConverting || !this.currentConversionId) return;
+        if (!this.isConverting) return;
         try {
             const response = await fetch('/cancel_conversion', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Conversion-ID': this.currentConversionId
-                }
+                method: 'POST'
             });
             if (!response.ok) throw new Error('Failed to cancel conversion');
             this.hide();
             this.isConverting = false;
-            this.currentConversionId = null;
             const form = document.querySelector('form');
             if (form) form.reset();
             this.showMessage('PDF conversion cancelled.');
