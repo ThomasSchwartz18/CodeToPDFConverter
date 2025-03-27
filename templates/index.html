@@ -344,10 +344,8 @@
               </h2>
               {% if pdf_url %}
               <div class="download-section">
-                <h3>View or Download your PDF:</h3>
-                <!-- Use the new function to enter view mode -->
-                <button onclick="enterView()">View</button>
-                <a href="{{ pdf_url }}" class="download-btn" download>Download</a>
+                <a href="{{ pdf_url }}" class="download-btn" id="download-pdf" download>Download</a>
+                <button id="view-pdf" onclick="enterView()">View</button>
               </div>
               {% endif %}
               <!-- Input Type Selection -->
@@ -599,5 +597,43 @@
 
   </script>
   <script src="../static/js/loading-popup.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.querySelector('input[type="file"]');
+        const githubInput = document.querySelector('input[name="github_url"]');
+        const downloadBtn = document.getElementById('download-pdf');
+        const viewBtn = document.getElementById('view-pdf');
+
+        function hidePdfViewAndDownload() {
+            const pdfViewSection = document.getElementById('pdf-view-section');
+            if (pdfViewSection) pdfViewSection.style.display = 'none';
+
+            const downloadSection = document.querySelector('.download-section');
+            if (downloadSection) downloadSection.style.display = 'none';
+
+            document.getElementById('form-section').style.display = 'block';
+        }
+
+        // Hide view/download when new file selected
+        fileInput.addEventListener('change', hidePdfViewAndDownload);
+
+        // Hide view/download immediately on typing GitHub URL
+        githubInput.addEventListener('input', hidePdfViewAndDownload);
+
+        // Hide PDF view section immediately on clicking download
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function () {
+                hidePdfViewAndDownload();
+            });
+        }
+
+        // Hide PDF view section immediately on clicking view
+        if (viewBtn) {
+            viewBtn.addEventListener('click', function () {
+                hidePdfViewAndDownload();
+            });
+        }
+    });
+  </script>
 </body>
 </html>
