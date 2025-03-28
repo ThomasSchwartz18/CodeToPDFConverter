@@ -12,7 +12,9 @@ from app.services.pdf_generator import PDFGenerator
 from app.services.file_processor import FileProcessor
 from app.services.github_service import GitHubService
 from app.config.settings import Config
+from app.utils.logger import setup_logger
 
+logger = setup_logger(__name__)
 main_bp = Blueprint('main', __name__)
 file_processor = FileProcessor()
 github_service = GitHubService()
@@ -207,16 +209,17 @@ def download_pdf():
         abort(403)  # Forbidden access if no conversion_id in session
 
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
-    print(f"Trying to serve file from: {output_pdf_path}")  # Debug log
+    logger.info(f"Attempting to serve file: {output_pdf_path}")
     
     if not os.path.exists(output_pdf_path):
-        print(f"File not found at: {output_pdf_path}")  # Debug log
+        logger.error(f"File not found: {output_pdf_path}")
         abort(404)  # File not found
 
     response = send_file(output_pdf_path, as_attachment=True, download_name=pdf_name)
     
     @response.call_on_close
     def cleanup():
+        logger.info(f"Cleaning up conversion: {conversion_id}")
         if conversion_id:
             if active_conversions.get(conversion_id, {}).get('github_repo'):
                 github_service.cleanup()
@@ -233,14 +236,23 @@ def view_pdf():
         abort(403)  # Forbidden access if no conversion_id in session
 
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
-    print(f"Trying to serve file from: {output_pdf_path}")  # Debug log
+    logger.info(f"Attempting to serve file: {output_pdf_path}")
     
     if not os.path.exists(output_pdf_path):
-        print(f"File not found at: {output_pdf_path}")  # Debug log
+        logger.error(f"File not found: {output_pdf_path}")
         abort(404)  # File not found
 
     # Do NOT cleanup session here, as user might still download afterward
-    return send_file(output_pdf_path, as_attachment=False)
+    response = send_file(output_pdf_path, mimetype='application/pdf')
+
+    @response.call_on_close
+    def cleanup():
+        logger.info(f"Cleaning up conversion: {conversion_id}")
+        if conversion_id:
+            file_processor.cleanup_conversion_files(conversion_id)
+            active_conversions.pop(conversion_id, None)
+            session.pop('conversion_id', None)
+    return response
 
 def generate_pdf_with_settings(settings, file_paths, conversion_id):
     page_size_option = settings.get("page_size", "letter")
@@ -260,7 +272,7 @@ def generate_pdf_with_settings(settings, file_paths, conversion_id):
         pdf_name = secure_filename(pdf_name_input)
     
     output_pdf_path = os.path.join(Config.UPLOAD_DIR, conversion_id, pdf_name)
-    print(f"Generating PDF at: {output_pdf_path}")  # Debug log
+    logger.info(f"Generating PDF at: {output_pdf_path}")  # Debug log
     
     generator = PDFGenerator(
         margin=settings.get("margin", 10),

@@ -15,3 +15,5 @@ build/
 .vscode/
 *.swp
 *.swo
+uploads/
+logs/

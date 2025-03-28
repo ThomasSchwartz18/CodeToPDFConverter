@@ -1,6 +1,7 @@
 import os
 import tempfile
 import secrets
+from datetime import timedelta
 
 class Config:
     # File upload settings
@@ -18,6 +19,7 @@ class Config:
     # Security
     # Use environment variable for SECRET_KEY, fallback to a secure random key
     SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=1)
     
     # PDF Settings
     DEFAULT_FONT_SIZE = 10
@@ -29,3 +31,8 @@ class Config:
     @classmethod
     def init_app(cls, app):
         os.makedirs(cls.UPLOAD_DIR, exist_ok=True) 
+
+    @staticmethod
+    def ensure_directories():
+        """Ensure all required directories exist."""
+        os.makedirs(Config.UPLOAD_DIR, exist_ok=True) 
